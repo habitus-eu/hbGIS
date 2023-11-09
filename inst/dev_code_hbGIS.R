@@ -1,6 +1,5 @@
 
 rm(list = ls())
-setwd("D:/Code/hbGIS")
 dirR = "D:/Code/hbGIS/R"
 
 ffnames = dir(dirR) # creating list of filenames of scriptfiles to load
@@ -8,7 +7,6 @@ for (i in 1:length(ffnames)) {
   source(paste(dirR,"/",ffnames[i], sep = "")) #loading scripts for reading geneactiv data
 }
 
-setwd("D:/Dropbox/Work/sharedfolder/DATA/Habitus/GPSprocessing/BEtestdata")
 library(readr)
 library(dplyr)
 library(tidyr)
