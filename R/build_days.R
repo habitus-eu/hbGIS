@@ -34,12 +34,12 @@ build_days <- function(data = NULL, verbose = TRUE,
                            palmsplus_fields = NULL,
                            loca = NULL,
                            participant_basis = NULL) {
-  
   # Note:
   # home, school, home_nbh, school_nbh (or similar) need to be present, 
   # because the functions that are passed on assume that they exist
   # So, now we need to create those objects from object loca
   Nlocations = length(loca)
+  identifier = NULL
   for (i in 1:Nlocations) {
     txt = paste0(names(loca[[i]])[1], " = loca[[i]][[1]]")
     eval(parse(text = txt))

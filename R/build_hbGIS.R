@@ -28,6 +28,7 @@ build_hbGIS <- function(data = NULL, verbose = TRUE, palmsplus_fields = NULL,
   # home, school, home_nbh, school_nbh (or similar) need to be present, 
   # because the functions that are passed on assume that they exist
   # So, now we need to create those objects from object loca
+  identifier = NULL
   Nlocations = length(loca)
   for (i in 1:Nlocations) {
     for (j in 1:2) {

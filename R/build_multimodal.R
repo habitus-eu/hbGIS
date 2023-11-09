@@ -6,7 +6,7 @@
 #' @param data The trajectories object built with \code{palms_calc_trajectories}.
 #' @param spatial_threshold Spatial threshold in meters
 #' @param temporal_threshold Temporal threshold in minutes
-#' @param palmsplus ...
+#' @param palmsplus The dataset build by \code{build_hbGIS}
 #' @param verbose Print progress after each step. Default is \code{TRUE}.
 #' @param multimodal_fields ...
 #' @param trajectory_locations ...
@@ -47,7 +47,7 @@ build_multimodal <- function(data = NULL,
   tripnumber = geometry = start_point = end_point = end_prev = NULL
   triptype = mot = variable = value = start_trip = end_trip = NULL
   distance_diff = time_diff = mmt_number = mmt_criteria = NULL
-  
+  identifier = NULL
   if (!all(c("identifier", "tripnumber", "start", "end", "geometry", "mot") %in% colnames(data))) {
     warning("Your trajectories data does not contain the required column names... skipping multimodal analyses")
     df = NULL

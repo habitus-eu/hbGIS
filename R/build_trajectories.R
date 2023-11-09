@@ -1,13 +1,11 @@
 
-#' Build trajectories from the palmsplus dataset
+#' Build trajectories from the hbGIS dataset
 #'
-#' @description Build trajectories (trips) from the \code{palmsplus} dataset. This
+#' @description Build trajectories (trips) from the \code{hbGPS} dataset. This
 #' returns a \code{sf data.frame} with \code{LINESTRING} geometry. Three columns
 #' are returned by default (\code{identifier}, \code{tripnumber}, and \code{geometry}).
-#' Additional columns can be specified with \code{\link{palms_add_trajectory_field}}
-#' and \code{\link{palms_add_trajectory_location}}.
 #'
-#' @param data The palmsplus data obtained from \code{\link{palms_build_palmsplus}}.
+#' @param data The dataset build by \code{build_hbGIS}.
 #' @param trajectory_fields trajectory_fields
 #' @param trajectory_locations trajectory_locations
 #'
@@ -21,7 +19,7 @@
 #' @export
 # Code modified from https://thets.github.io/palmsplusr/
 build_trajectories <- function(data = NULL, trajectory_fields = NULL, trajectory_locations = NULL) {
-  name = after_conversion = tripnumber = NULL
+  name = after_conversion = tripnumber = identifier = NULL
   
   args <- trajectory_fields %>% filter(after_conversion == FALSE)
   args_after <- trajectory_fields %>% filter(after_conversion == TRUE)

@@ -21,7 +21,7 @@ build_multimodal(
 
 \item{temporal_threshold}{Temporal threshold in minutes}
 
-\item{palmsplus}{...}
+\item{palmsplus}{The dataset build by \code{build_hbGIS}}
 
 \item{verbose}{Print progress after each step. Default is \code{TRUE}.}
 

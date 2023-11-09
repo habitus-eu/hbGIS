@@ -2,7 +2,7 @@
 % Please edit documentation in R/build_trajectories.R
 \name{build_trajectories}
 \alias{build_trajectories}
-\title{Build trajectories from the palmsplus dataset}
+\title{Build trajectories from the hbGIS dataset}
 \usage{
 build_trajectories(
   data = NULL,
@@ -11,7 +11,7 @@ build_trajectories(
 )
 }
 \arguments{
-\item{data}{The palmsplus data obtained from \code{\link{palms_build_palmsplus}}.}
+\item{data}{The dataset build by \code{build_hbGIS}.}
 
 \item{trajectory_fields}{trajectory_fields}
 
@@ -21,9 +21,7 @@ build_trajectories(
 A table of individual trips represented as \code{LINESTRING} geometry.
 }
 \description{
-Build trajectories (trips) from the \code{palmsplus} dataset. This
+Build trajectories (trips) from the \code{hbGPS} dataset. This
 returns a \code{sf data.frame} with \code{LINESTRING} geometry. Three columns
 are returned by default (\code{identifier}, \code{tripnumber}, and \code{geometry}).
-Additional columns can be specified with \code{\link{palms_add_trajectory_field}}
-and \code{\link{palms_add_trajectory_location}}.
 }

@@ -2,7 +2,6 @@
 #'
 #' @param file Character to specify location of configuration file
 #' @return list of parameters extract from the configuration file
-#' @importFrom jsonlite fromJSON
 #' @importFrom utils read.csv read.table
 #' @export
 
