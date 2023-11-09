@@ -18,12 +18,12 @@
 #' @export
 
 hbGIS <- function(gisdir = "",
-                             palmsdir = "",
-                             gislinkfile = "",
-                             outputdir = "",
-                             dataset_name = "",
-                             configfile = "",
-                             verbose = TRUE) {
+                  palmsdir = "",
+                  gislinkfile = "",
+                  outputdir = "",
+                  dataset_name = "",
+                  configfile = "",
+                  verbose = TRUE) {
   publiclocation = "park"
   groupinglocation = "school"
   lon = identifier = palms = NULL # . = was also included, but probably wrong
@@ -80,6 +80,8 @@ hbGIS <- function(gisdir = "",
     }
   }
   
+  # >>> TO DO: Check that public locations that are not linked to an ID can be loaded in code above <<<
+  
   #===============================================
   # hbGPS output (PALMS output)
   #===============================================
@@ -120,14 +122,19 @@ hbGIS <- function(gisdir = "",
   palms$datetime = as.POSIXct(palms$datetime, format = "%d/%m/%Y %H:%M:%S", tz = "")
   
   #===============================================
-  # Load linkage file and identify which PALMS ids and home/school ids are missing
+  # Load linkage file and identify which PALMS ids and home/school
+  # ids are missing, but allow for publiclocations that are not linked
+  # to an ID
   #===============================================
   participant_basis = read_csv(gislinkfile, show_col_types = FALSE)
   
+  
+  # >>> TO DO: Allow for public locations that are not linked to an ID <<<
+  
   # Check for missing IDs -------------------------------------------------------------------------
   withoutMissingId = check_missing_id(participant_basis, palmsplus_folder, dataset_name, palms,
-                                          loca, groupinglocation = groupinglocation,
-                                          verbose = verbose)
+                                      loca, groupinglocation = groupinglocation,
+                                      verbose = verbose)
   palms = withoutMissingId$palms
   participant_basis = withoutMissingId$participant_basis
   loca = withoutMissingId$loca
@@ -160,6 +167,9 @@ hbGIS <- function(gisdir = "",
     # If no configfile is provided fall back on default
     config <- system.file("testfiles_hbGIS/config_hbGIS.csv", package = "hbGIS")[1]
   }
+  
+  
+  # >>> TO DO: Add fields for public places <<<
   
   # adding fields
   CONF = read.csv(config, sep = ",")
@@ -248,10 +258,10 @@ hbGIS <- function(gisdir = "",
       all(Nlocation_objects > 0) & length(participant_basis) > 0) {
     
     palmsplus <- build_hbGIS(data = palms, 
-                                     palmsplus_fields = palmsplus_fields,
-                                     loca = loca,
-                                     participant_basis = participant_basis,
-                                     verbose = verbose)
+                             palmsplus_fields = palmsplus_fields,
+                             loca = loca,
+                             participant_basis = participant_basis,
+                             verbose = verbose)
     write_csv(palmsplus, file = fns[1])
     if (verbose) cat(">>>\n")
   } else {
@@ -261,11 +271,11 @@ hbGIS <- function(gisdir = "",
   if (length(palmsplus) > 0 & length(palmsplus_domains) > 0 & length(palmsplus_fields) &
       all(Nlocation_objects > 0) & length(participant_basis) > 0) {
     days <- build_days(data = palmsplus,
-                           palmsplus_domains = palmsplus_domains,
-                           palmsplus_fields = palmsplus_fields,
-                           loca = loca,
-                           participant_basis = participant_basis,
-                           verbose = verbose)
+                       palmsplus_domains = palmsplus_domains,
+                       palmsplus_fields = palmsplus_fields,
+                       loca = loca,
+                       participant_basis = participant_basis,
+                       verbose = verbose)
     
     if (length(days) > 0) {
       if (verbose) cat(paste0("  N rows in days object: ", nrow(days)))
@@ -285,8 +295,8 @@ hbGIS <- function(gisdir = "",
   if (length(palmsplus) > 0 & length(trajectory_fields) > 0) {
     
     trajectories <- build_trajectories(data = palmsplus,
-                                           trajectory_fields = trajectory_fields,
-                                           trajectory_locations = trajectory_locations)
+                                       trajectory_fields = trajectory_fields,
+                                       trajectory_locations = trajectory_locations)
     if (length(trajectories) > 0) {
       write_csv(trajectories,  file = fns[3])
       shp_file = paste0(palmsplus_folder, "/", dataset_name, "_trajecories.shp")
@@ -304,12 +314,12 @@ hbGIS <- function(gisdir = "",
   if (verbose) cat("\n<<< building multimodal...\n")
   if (length(palmsplus) > 0 & length(multimodal_fields) > 0 & length(trajectory_locations) > 0) {
     multimodal <- build_multimodal(data = trajectories,
-                                       spatial_threshold = 200,
-                                       temporal_threshold = 10,
-                                       palmsplus = palmsplus,
-                                       multimodal_fields = multimodal_fields,
-                                       trajectory_locations = trajectory_locations,
-                                       verbose = verbose)
+                                   spatial_threshold = 200,
+                                   temporal_threshold = 10,
+                                   palmsplus = palmsplus,
+                                   multimodal_fields = multimodal_fields,
+                                   trajectory_locations = trajectory_locations,
+                                   verbose = verbose)
     
     if (length(multimodal) > 0) {
       write_csv(multimodal, file = fns[4])
