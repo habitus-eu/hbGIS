@@ -1,0 +1,22 @@
+Package: hbGIS
+Title: Process GIS Data for Human Behaviour Research
+Description: Processes GIS data merge with hbGPS pre-processed data of wearable GPS and accelerometation sensors.
+Version: 0.0.1
+Date: 2023-11-09
+Authors@R: 
+    c(person(given = "Vincent",
+           family = "van Hees",
+           role = c("aut", "cre"),
+           email = "v.vanhees@accelting.com"),
+           person("Tom", "Stewart", role = "cph", email = "tom.stewart@aut.ac.nz",
+           comment = "holds copyright over original palmsplusr code"))
+License: Apache License version 2.0 | file LICENSE
+Imports: DT,  dplyr, magrittr, sf, readr, tidyr, stringr, callr, palmsplusr,
+    data.table, rlang, purrr, geosphere, hbGPS
+Remotes: vincentvanhees/palmsplusr
+LazyData: true
+Suggests: testthat, covr, rmarkdown
+Depends: stats, utils, R (>= 3.5.0)
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
