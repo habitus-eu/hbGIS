@@ -24,8 +24,12 @@ hbGIS <- function(gisdir = "",
                              dataset_name = "",
                              configfile = "",
                              verbose = TRUE) {
-  
+  publiclocation = "park"
   groupinglocation = "school"
+  lon = identifier = palms = NULL # . = was also included, but probably wrong
+  #===============================================
+  # GIS files
+  #===============================================
   # create list structure to house the location objects
   shapefilenames = dir(path = gisdir, full.names = FALSE, pattern = "[.]shp")
   locationNames = unique(gsub(pattern = "table|_|buffers|[.]|xml|shp|loc", replacement = "", x = shapefilenames))
@@ -36,9 +40,105 @@ hbGIS <- function(gisdir = "",
   for (i in 1:Nlocations) {
     loca[[i]] = vector("list", 4)
     names(loca[[i]]) =  c(locationNames[i], paste0(locationNames[i], "_nbh"), 
-                          paste0(locationNames[i], "_tablefile"), paste0(locationNames[i], "_locbufferfile"))
+                          paste0(locationNames[i], "_tablefile"),
+                          paste0(locationNames[i], "_locbufferfile"))
   }
-  lon = identifier = palms = NULL # . = was also included, but probably wrong
+  
+  # Helper function to find shape files
+  find_file = function(path, namelowercase) {
+    allcsvfiles = dir(path, recursive = TRUE, full.names = TRUE)
+    file_of_interest = allcsvfiles[which(tolower(basename(allcsvfiles)) == namelowercase)]
+    return(file_of_interest)
+  }
+  # Find shape files
+  for (jj in 1:Nlocations) {
+    findfile3 = find_file(path = gisdir, namelowercase = paste0(locationNames[jj], "_table.shp"))
+    if (!is.null(findfile3)) {
+      loca[[jj]][3] = findfile3
+    } else {
+      stop(paste0("unable to find ", findfile3))
+    }
+    findfile4 = find_file(path = gisdir, namelowercase = paste0("loc_", locationNames[jj], "buffers.shp"))
+    if (!is.null(findfile3)) {
+      loca[[jj]][4] = findfile4
+    } else {
+      stop(paste0("unable to find ", findfile4))
+    }
+    loca[[jj]][[1]] = sf::read_sf(loca[[jj]][3]) #home_nbh
+    loca[[jj]][[2]] = sf::read_sf(loca[[jj]][4]) #school_nbh
+  }
+  # Force id numbers to be character(
+  locationNames = names(loca)
+  for (i in 1:length(loca)) {
+    if (locationNames[i] != "home") {
+      loc_id = paste0(groupinglocation, "_id")
+    } else  if (locationNames[i] == "home") { # assumption that home is always the identifier for individuals
+      loc_id = "identifier"
+    } 
+    for (j in 1:2) {
+      loca[[i]][j][[1]][[loc_id]] = as.character(loca[[i]][j][[1]][[loc_id]])
+    }
+  }
+  
+  #===============================================
+  # hbGPS output (PALMS output)
+  #===============================================
+  palmsplus_folder = paste0(outputdir, "/hbGIS_output")
+  if (!dir.exists(palmsplus_folder)) {
+    if (verbose) cat("\nCreating hbGIS output directory\n")
+    dir.create(palmsplus_folder)
+  }
+  sf::sf_use_s2(FALSE)
+  # identify palms csv output files in palmsdir:
+  palms_country_files <- list.files(path = palmsdir, pattern = "*.csv", full.names = TRUE)
+  # skip the combined file that palms generates
+  palms_country_files = grep(pattern = "combined.csv", x = palms_country_files, invert = TRUE, value = TRUE)
+  # read and combine palms csv output files 
+  csv_palms <- lapply(palms_country_files, FUN = readr::read_csv, col_types = list(
+    identifier = readr::col_character(),
+    dow = readr::col_integer(),
+    lat = readr::col_double(),
+    lon = readr::col_double(),
+    fixTypeCode = readr::col_integer(),
+    iov = readr::col_integer(),
+    tripNumber = readr::col_integer(),
+    tripType = readr::col_integer(),
+    tripMOT = readr::col_integer(),
+    activity = readr::col_double()
+  ), show_col_types = FALSE)
+  PALMS_combined <- bind_rows(csv_palms)
+  # Data cleaning:
+  PALMS_reduced <- subset(PALMS_combined, lon > -180)
+  palms_reduced_cleaned <- check_and_clean_palms_data(PALMS_reduced, dataset_name, outputdir)
+  PALMS_reduced$dateTime = as.POSIXct(PALMS_reduced$dateTime, format = "%d/%m/%Y %H:%M:%S", tz = "")
+  
+  # Write to csv and read using read_palms to format the object as expected from the rest of the code
+  PALMS_reduced_file = normalizePath(paste0(palmsplus_folder, "/", stringr::str_interp("PALMS_${dataset_name}_reduced.csv")))
+  # if (verbose) cat(paste0("\nCheck PALMS_reduced_file: ", PALMS_reduced_file))
+  write.csv(palms_reduced_cleaned, PALMS_reduced_file)
+  palms = palmsplusr::read_palms(PALMS_reduced_file, verbose = FALSE)
+  palms$datetime = as.POSIXct(palms$datetime, format = "%d/%m/%Y %H:%M:%S", tz = "")
+  
+  #===============================================
+  # Load linkage file and identify which PALMS ids and home/school ids are missing
+  #===============================================
+  participant_basis = read_csv(gislinkfile, show_col_types = FALSE)
+  
+  # Check for missing IDs -------------------------------------------------------------------------
+  withoutMissingId = check_missing_id(participant_basis, palmsplus_folder, dataset_name, palms,
+                                          loca, groupinglocation = groupinglocation,
+                                          verbose = verbose)
+  palms = withoutMissingId$palms
+  participant_basis = withoutMissingId$participant_basis
+  loca = withoutMissingId$loca
+  write.csv(participant_basis, paste0(palmsplus_folder, "/", stringr::str_interp("participant_basis_${dataset_name}.csv"))) # store file for logging purposes only
+  if (length(participant_basis) == 0 || nrow(participant_basis) == 0) {
+    stop("\nParticipant basis file does not include references for the expected recording IDs")
+  }
+  
+  #===============================================
+  # Load configuration and define field tables
+  #===============================================
   if (length(configfile) > 0) {
     # check for missing parameters, such that hbGIS can fall back on defaults
     # here the config_pamsplusr file inside the package is assumed to hold all the defaults.
@@ -61,97 +161,6 @@ hbGIS <- function(gisdir = "",
     config <- system.file("testfiles_hbGIS/config_hbGIS.csv", package = "hbGIS")[1]
   }
   
-  palmsplus_folder = paste0(outputdir, "/hbGIS_output")
-  if (!dir.exists(palmsplus_folder)) {
-    if (verbose) cat("\nCreating hbGIS output directory\n")
-    dir.create(palmsplus_folder)
-  }
-  sf::sf_use_s2(FALSE)
-  # identify palms csv output files in palmsdir:
-  palms_country_files <- list.files(path = palmsdir, pattern = "*.csv", full.names = TRUE)
-  # skip the combined file that hbGPS generates
-  palms_country_files = grep(pattern = "combined.csv", x = palms_country_files, invert = TRUE, value = TRUE)
-  # read and combine palms csv output files 
-  csv_palms <- lapply(palms_country_files, FUN = readr::read_csv, col_types = list(
-    identifier = readr::col_character(),
-    dow = readr::col_integer(),
-    lat = readr::col_double(),
-    lon = readr::col_double(),
-    fixTypeCode = readr::col_integer(),
-    iov = readr::col_integer(),
-    tripNumber = readr::col_integer(),
-    tripType = readr::col_integer(),
-    tripMOT = readr::col_integer(),
-    activity = readr::col_double()
-  ), show_col_types = FALSE)
-  PALMS_combined <- bind_rows(csv_palms)
-  # Data cleaning:
-  # if (verbose) cat("\nstart cleaning...\n")
-  PALMS_reduced <- subset(PALMS_combined, lon > -180)
-  palms_reduced_cleaned <- check_and_clean_palms_data(PALMS_reduced, dataset_name, outputdir)
-  # if (verbose) cat("\ncleaning completed\n")
-  PALMS_reduced$dateTime = as.POSIXct(PALMS_reduced$dateTime, format = "%d/%m/%Y %H:%M:%S", tz = "")
-  
-  # Write to csv and read using read_palms to format the object as expected from the rest of the code
-  PALMS_reduced_file = normalizePath(paste0(palmsplus_folder, "/", stringr::str_interp("PALMS_${dataset_name}_reduced.csv")))
-  # if (verbose) cat(paste0("\nCheck PALMS_reduced_file: ", PALMS_reduced_file))
-  write.csv(palms_reduced_cleaned, PALMS_reduced_file)
-  palms = palmsplusr::read_palms(PALMS_reduced_file, verbose = FALSE)
-  palms$datetime = as.POSIXct(palms$datetime, format = "%d/%m/%Y %H:%M:%S", tz = "")
-  # Helper function to find shape files
-  find_file = function(path, namelowercase) {
-    allcsvfiles = dir(path, recursive = TRUE, full.names = TRUE)
-    file_of_interest = allcsvfiles[which(tolower(basename(allcsvfiles)) == namelowercase)]
-    return(file_of_interest)
-  }
-  # if (verbose) cat("\nreading basis file\n")
-  participant_basis = read_csv(gislinkfile, show_col_types = FALSE)
-  # Load all shape files ----------------------------------------------------
-  #----------------
-  # NEW CODE
-  for (jj in 1:Nlocations) {
-    findfile3 = find_file(path = gisdir, namelowercase = paste0(locationNames[jj], "_table.shp"))
-    if (!is.null(findfile3)) {
-      loca[[jj]][3] = findfile3
-    } else {
-      stop(paste0("unable to find ", findfile3))
-    }
-    findfile4 = find_file(path = gisdir, namelowercase = paste0("loc_", locationNames[jj], "buffers.shp"))
-    if (!is.null(findfile3)) {
-      loca[[jj]][4] = findfile4
-    } else {
-      stop(paste0("unable to find ", findfile4))
-    }
-    loca[[jj]][[1]] = sf::read_sf(loca[[jj]][3]) #home_nbh
-    loca[[jj]][[2]] = sf::read_sf(loca[[jj]][4]) #school_nbh
-  }
-  # Force id numbers to be characrer(
-  locationNames = names(loca)
-  for (i in 1:length(loca)) {
-    if (locationNames[i] != "home") {
-      loc_id = paste0(groupinglocation, "_id")
-    } else  if (locationNames[i] == "home") { # assumption that home is always the identifier for individuals
-      loc_id = "identifier"
-    } 
-    for (j in 1:2) {
-      loca[[i]][j][[1]][[loc_id]] = as.character(loca[[i]][j][[1]][[loc_id]])
-    }
-  }
-  # Check for missing IDs -------------------------------------------------------------------------
-  withoutMissingId = check_missing_id(participant_basis, palmsplus_folder, dataset_name, palms,
-                                          loca, groupinglocation = groupinglocation,
-                                          verbose = verbose)
-  palms = withoutMissingId$palms
-  participant_basis = withoutMissingId$participant_basis
-  loca = withoutMissingId$loca
-  write.csv(participant_basis, paste0(palmsplus_folder, "/", stringr::str_interp("participant_basis_${dataset_name}.csv"))) # store file for logging purposes only
-  if (length(participant_basis) == 0 || nrow(participant_basis) == 0) {
-    stop("\nParticipant basis file does not include references for the expected recording IDs")
-  }
-  
-  #===========================================================================================  
-  # Create field tables
-  # #=============================
   # adding fields
   CONF = read.csv(config, sep = ",")
   CONF$start_criteria = ""
@@ -237,7 +246,6 @@ hbGIS <- function(gisdir = "",
   if (verbose) cat("\n<<< building palmsplus...\n")
   if (length(palms) > 0 & length(palmsplus_fields) &
       all(Nlocation_objects > 0) & length(participant_basis) > 0) {
-    
     
     palmsplus <- build_hbGIS(data = palms, 
                                      palmsplus_fields = palmsplus_fields,

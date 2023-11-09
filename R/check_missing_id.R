@@ -56,7 +56,6 @@ check_missing_id = function(participant_basis, palmsplus_folder, dataset_name, p
         cat(paste0("\n  palms: ", Npi))
       }
     }
-    # cat("\n")
   }
   
   locationNames = names(loca)
