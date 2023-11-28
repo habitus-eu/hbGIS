@@ -17,13 +17,22 @@ library(purrr)
 library(geosphere)
 library(lwgeom)
 
-hbGIS(gisdir = "D:/Dropbox/Work/sharedfolder/DATA/Habitus/GPSprocessing/NBBB2010/GIS",
-                 palmsdir = "D:/Dropbox/Work/sharedfolder/DATA/Habitus/GPSprocessing/NBBB2010/hbGPSoutput",
-                 gislinkfile = "D:/Dropbox/Work/sharedfolder/DATA/Habitus/GPSprocessing/NBBB2010/Tables/participant_basis.csv",
-                 outputdir = "D:/Dropbox/Work/sharedfolder/DATA/Habitus/GPSprocessing/NBBB2010",
-                 dataset_name = "NBBB2010",
-                 configfile = "D:/Dropbox/Work/sharedfolder/DATA/Habitus/GPSprocessing/NBBB2010/config_palmsplusr.csv")
+
+hbGIS(gisdir = "D:/Dropbox/Work/sharedfolder/DATA/Habitus/GPSprocessing/JasperNov2023/loc_greenspace",
+      palmsdir = "D:/Dropbox/Work/sharedfolder/DATA/Habitus/GPSprocessing/JasperNov2023/hbGPSoutput",
+      gislinkfile = NULL,
+      outputdir = "D:/Dropbox/Work/sharedfolder/DATA/Habitus/GPSprocessing/JasperNov2023",
+      dataset_name = "JasperNov2023",
+      configfile = "D:/Dropbox/Work/sharedfolder/DATA/Habitus/GPSprocessing/NBBB2010/config_palmsplusr.csv")
 kkk
+# 
+# hbGIS(gisdir = "D:/Dropbox/Work/sharedfolder/DATA/Habitus/GPSprocessing/NBBB2010/GIS",
+#                  palmsdir = "D:/Dropbox/Work/sharedfolder/DATA/Habitus/GPSprocessing/NBBB2010/hbGPSoutput",
+#                  gislinkfile = "D:/Dropbox/Work/sharedfolder/DATA/Habitus/GPSprocessing/NBBB2010/Tables/participant_basis.csv",
+#                  outputdir = "D:/Dropbox/Work/sharedfolder/DATA/Habitus/GPSprocessing/NBBB2010",
+#                  dataset_name = "NBBB2010",
+#                  configfile = "D:/Dropbox/Work/sharedfolder/DATA/Habitus/GPSprocessing/NBBB2010/config_palmsplusr.csv")
+# kkk
 
 # Belgium dataset
 # hbGIS(gisdir = "D:/Dropbox/Work/sharedfolder/DATA/Habitus/GPSprocessing/BEtestdata/GIS",

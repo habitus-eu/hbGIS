@@ -37,6 +37,15 @@ hbGIS <- function(gisdir = "",
   Nlocations = length(locationNames)
   loca = vector("list", Nlocations)
   names(loca) = locationNames
+  # Initialise loca object which is a list that for each location
+  # has a list with four items:
+  # 1 - location shape
+  # 2 - location neighbourhood shape
+  # 3 - shape file to read 1
+  # 4 - shape file to read 2
+  # Sometimes neighbourhood is referred to as buffer
+  # For some location types such as parks some of these are missing,
+  # which for now is ok, those lists will be left empty.
   for (i in 1:Nlocations) {
     loca[[i]] = vector("list", 4)
     names(loca[[i]]) =  c(locationNames[i], paste0(locationNames[i], "_nbh"), 
@@ -48,6 +57,7 @@ hbGIS <- function(gisdir = "",
   find_file = function(path, namelowercase) {
     allcsvfiles = dir(path, recursive = TRUE, full.names = TRUE)
     file_of_interest = allcsvfiles[which(tolower(basename(allcsvfiles)) == namelowercase)]
+    if (length(file_of_interest) == 0) file_of_interest = NULL
     return(file_of_interest)
   }
   # Find shape files
@@ -55,33 +65,37 @@ hbGIS <- function(gisdir = "",
     findfile3 = find_file(path = gisdir, namelowercase = paste0(locationNames[jj], "_table.shp"))
     if (!is.null(findfile3)) {
       loca[[jj]][3] = findfile3
-    } else {
-      stop(paste0("unable to find ", findfile3))
+      loca[[jj]][[1]] = sf::read_sf(loca[[jj]][3]) #e.g. school or home
     }
     findfile4 = find_file(path = gisdir, namelowercase = paste0("loc_", locationNames[jj], "buffers.shp"))
-    if (!is.null(findfile3)) {
+    if (!is.null(findfile4)) {
       loca[[jj]][4] = findfile4
     } else {
-      stop(paste0("unable to find ", findfile4))
+      # If it is not a buffer file then it is space file, eg. public park
+      findfile4 = find_file(path = gisdir, namelowercase = paste0("loc_", locationNames[jj], ".shp"))
+      if (!is.null(findfile4)) {
+        loca[[jj]][4] = findfile4
+      }
     }
-    loca[[jj]][[1]] = sf::read_sf(loca[[jj]][3]) #home_nbh
-    loca[[jj]][[2]] = sf::read_sf(loca[[jj]][4]) #school_nbh
+    # Only load shape file if it exists
+    if (!is.null(loca[[i]][4][[1]])) {
+      loca[[jj]][[2]] = sf::read_sf(loca[[jj]][4]) #e.g. school_nbh, home_nbh, or park
+    }
   }
+  
   # Force id numbers to be character(
   locationNames = names(loca)
   for (i in 1:length(loca)) {
-    if (locationNames[i] != "home") {
-      loc_id = paste0(groupinglocation, "_id")
-    } else  if (locationNames[i] == "home") { # assumption that home is always the identifier for individuals
-      loc_id = "identifier"
-    } 
-    for (j in 1:2) {
-      loca[[i]][j][[1]][[loc_id]] = as.character(loca[[i]][j][[1]][[loc_id]])
+    if (!is.null(loca[[i]][3][[1]])) { # only consider locations with data
+      for (j in 1:2) {
+        loc_id = grep(pattern = "ID|identifier|_id", x = colnames(loca[[i]][j][[1]]))
+        if (length(loc_id) > 0) {
+          loca[[i]][j][[1]][[loc_id]] = as.character(loca[[i]][j][[1]][[loc_id]])
+        }
+      }
     }
   }
-  
-  # >>> TO DO: Check that public locations that are not linked to an ID can be loaded in code above <<<
-  
+
   #===============================================
   # hbGPS output (PALMS output)
   #===============================================
@@ -95,6 +109,47 @@ hbGIS <- function(gisdir = "",
   palms_country_files <- list.files(path = palmsdir, pattern = "*.csv", full.names = TRUE)
   # skip the combined file that palms generates
   palms_country_files = grep(pattern = "combined.csv", x = palms_country_files, invert = TRUE, value = TRUE)
+  if (length(palms_country_files) == 0) {
+    # Simulate hbGPS output (only for code developement purposes)
+    Nmin = 500
+    now = Sys.time()
+    dateTime = seq(now, now + ((Nmin - 1) * 60), by = 60)
+    example_object = loca[[1]][[2]][1,]
+    point_in_object = st_sample(x = example_object, size = 1)
+    xy = sf::st_coordinates(x = point_in_object)
+    
+    # latitude is for most of the time 1 lat degree away from location
+    # but for 30 minutes inside the location surround by 5 minute trips before and after
+    trip = seq(xy[1] - 1, xy[1] - 0.2, by = 0.2)
+    away = rep(xy[1] - 1, (Nmin/2) - 20)
+    lat = c(away, trip, rep(xy[1], 30), rev(trip), away)
+    lon = rep(xy[2], Nmin) # lon stays the same the entire time
+    tripNumber = c(rep(0, length(away)), rep(1, 5), rep(0, 30), rep(2, 5), rep(0, length(away)))
+    sedentaryBoutNumber = c(rep(1, length(away)), rep(0, 5), rep(2, 30), rep(0, 5), rep(3, length(away)))
+    tripType = rep(0, Nmin)
+    tripMOT = rep(0, Nmin)
+    tripType[which(diff(tripNumber) > 0)] = 1
+    tripType[which(diff(tripNumber) < 0)] = 4
+    tripMOT[which(tripNumber != 0)] = 3
+    hbGPSout = data.frame(identifier = "sim1",
+                          dateTime	= dateTime,
+                          dow = rep(5, Nmin),
+                          lat	= lat,
+                          lon	= lon,
+                          fixTypeCode	= rep(-1, Nmin),
+                          iov	= rep(2, Nmin), # all the time outdoor (indoor, outdoor, vehicle)
+                          tripNumber = tripNumber,
+                          tripType = tripType,
+                          tripMOT	= tripMOT,
+                          activity = rep(0, Nmin),
+                          activityIntensity = rep(0, Nmin),
+                          activityBoutNumber = rep(0, Nmin),
+                          sedentaryBoutNumber = sedentaryBoutNumber)
+    if (!dir.exists(palmsdir)) dir.create(palmsdir, recursive = TRUE)
+    palms_country_files = paste0(palmsdir, "/combined.csv")
+    write.csv(hbGPSout, file = palms_country_files, row.names = FALSE)
+  }
+
   # read and combine palms csv output files 
   csv_palms <- lapply(palms_country_files, FUN = readr::read_csv, col_types = list(
     identifier = readr::col_character(),
@@ -120,16 +175,20 @@ hbGIS <- function(gisdir = "",
   write.csv(palms_reduced_cleaned, PALMS_reduced_file)
   palms = palmsplusr::read_palms(PALMS_reduced_file, verbose = FALSE)
   palms$datetime = as.POSIXct(palms$datetime, format = "%d/%m/%Y %H:%M:%S", tz = "")
-  
+
   #===============================================
   # Load linkage file and identify which PALMS ids and home/school
   # ids are missing, but allow for publiclocations that are not linked
   # to an ID
   #===============================================
+  # >>> TO DO:
+  # >>> Allow for skipping of gislinkfile if it is missing
+  # >>> Allow for public locations that are not linked to an ID
+  
   participant_basis = read_csv(gislinkfile, show_col_types = FALSE)
   
   
-  # >>> TO DO: Allow for public locations that are not linked to an ID <<<
+  
   
   # Check for missing IDs -------------------------------------------------------------------------
   withoutMissingId = check_missing_id(participant_basis, palmsplus_folder, dataset_name, palms,
