@@ -117,7 +117,7 @@ hbGIS <- function(gisdir = "",
   if (length(palms_country_files) == 0) {
     # Simulate hbGPS output (only for code developement purposes)
     Nmin = 500
-    now = Sys.time()
+    now = as.POSIXct("2023-11-30 10:00:00 CET")
     dateTime = seq(now, now + ((Nmin - 1) * 60), by = 60)
     example_object = loca[[1]][[2]][1,]
     point_in_object = st_sample(x = example_object, size = 1)
@@ -127,8 +127,8 @@ hbGIS <- function(gisdir = "",
     # but for 30 minutes inside the location surround by 5 minute trips before and after
     trip = seq(xy[1] - 1, xy[1] - 0.2, by = 0.2)
     away = rep(xy[1] - 1, (Nmin/2) - 20)
-    lat = c(away, trip, rep(xy[1], 30), rev(trip), away)
-    lon = rep(xy[2], Nmin) # lon stays the same the entire time
+    lon = c(away, trip, rep(xy[1], 30), rev(trip), away)
+    lat = rep(xy[2], Nmin) # lon stays the same the entire time
     tripNumber = c(rep(0, length(away)), rep(1, 5), rep(0, 30), rep(2, 5), rep(0, length(away)))
     sedentaryBoutNumber = c(rep(1, length(away)), rep(0, 5), rep(2, 30), rep(0, 5), rep(3, length(away)))
     tripType = rep(0, Nmin)
@@ -312,7 +312,7 @@ hbGIS <- function(gisdir = "",
       # Note palms_in_polygon allows for aggregating polygons based by variable
       CONF[nrow(CONF) + 1, ] = c("palmsplus_field",
                                  paste0("at_", locationNames[i], "_nbh"), 
-                                 paste0("suppressMessages(any(st_contains(", locationNames[i], "_nbh, datai, sparse = FALSE)))"),
+                                 paste0("suppressMessages(colSums(st_contains(", locationNames[i], "_nbh, datai, sparse = FALSE)))"),
                                  NA, "", "", "")
     }
     reference_location = ifelse("home" %in% locationNames, yes = "home", no = locationNames[1])
@@ -370,7 +370,6 @@ hbGIS <- function(gisdir = "",
   for (i in 1:Nlocations) {
     Nlocation_objects = c(Nlocation_objects, length(loca[[i]][[2]])) # at least a nbh object is expected #length(loca[[i]][[1]]), 
   }
-  
   if (verbose) cat("\n<<< building palmsplus...\n")
   if (length(palms) > 0 & length(palmsplus_fields) &
       all(Nlocation_objects > 0) & length(participant_basis) > 0) {
@@ -385,7 +384,6 @@ hbGIS <- function(gisdir = "",
   } else {
     if (verbose) cat("skipped because insufficient input data>>>\n")
   }
-  
   if (verbose) cat("\n<<< building days...")
   if (length(palmsplus) > 0 & length(palmsplus_domains) > 0 & length(palmsplus_fields) &
       all(Nlocation_objects > 0) & length(participant_basis) > 0) {
