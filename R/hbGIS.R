@@ -27,6 +27,7 @@ hbGIS <- function(gisdir = "",
   publiclocation = "park"
   groupinglocation = "school"
   lon = identifier = palms = NULL # . = was also included, but probably wrong
+  
   #===============================================
   # GIS files
   #===============================================
@@ -179,6 +180,7 @@ hbGIS <- function(gisdir = "",
   write.csv(palms_reduced_cleaned, PALMS_reduced_file, row.names = FALSE)
   palms = palmsplusr::read_palms(PALMS_reduced_file, verbose = FALSE)
   palms$datetime = as.POSIXct(palms$datetime, format = "%d/%m/%Y %H:%M:%S", tz = "")
+  
   #===============================================
   # Load linkage file and identify which PALMS ids and home/school
   # ids are missing, but allow for publiclocations that are not linked
@@ -228,9 +230,6 @@ hbGIS <- function(gisdir = "",
     config <- system.file("testfiles_hbGIS/config_hbGIS.csv", package = "hbGIS")[1]
   }
   
-  
-  # >>> TO DO: Add fields for public places <<<
-  
   # adding fields
   CONF = read.csv(config, sep = ",")
   CONF$start_criteria = ""
@@ -254,6 +253,7 @@ hbGIS <- function(gisdir = "",
                                     ifelse(test = length(locationNames_nbh) > 0, yes = " & ", no = ""),
                                     paste0("!", paste0("at_", locationNames_nbh, "_nbh", collapse = " & !"))),
                              TRUE, NA, "", "")
+  
   for (i in 1:Nlocations) {
     # palmsplus_domain:
     #-------------------
@@ -273,6 +273,7 @@ hbGIS <- function(gisdir = "",
                                  TRUE,
                                  NA, "", "")
     }
+    
     # palmsplus_field:
     #-------------------
     if (!is.null(loca[[i]][[1]])) {
@@ -328,6 +329,7 @@ hbGIS <- function(gisdir = "",
     }
     CONF = CONF[!duplicated(CONF),]
   }
+  
   palmsplusr_field_rows = which(CONF$context == "palmsplus_field")
   palmsplus_fields = tibble(name = CONF$name[palmsplusr_field_rows],
                             formula = CONF$formula[palmsplusr_field_rows],
@@ -337,24 +339,24 @@ hbGIS <- function(gisdir = "",
   palmsplus_domains = tibble(name = CONF$name[palmsplusr_domain_rows],
                              formula = CONF$formula[palmsplusr_domain_rows],
                              domain_field = CONF$domain_field[palmsplusr_domain_rows])
-  # #=============================
-  # # trajectory_fields
+  #=============================
+  # trajectory_fields
   trajectory_field_rows = which(CONF$context == "trajectory_field")
   trajectory_fields = tibble(name = CONF$name[trajectory_field_rows],
                              formula = CONF$formula[trajectory_field_rows],
                              after_conversion = CONF$after_conversion[trajectory_field_rows])
-  # #=============================
-  # # multimodal_fields
+  #=============================
+  # multimodal_fields
   multimodal_fields_rows = which(CONF$context == "multimodal_field")
   multimodal_fields = tibble(name = CONF$name[multimodal_fields_rows],
                              formula = CONF$formula[multimodal_fields_rows])
-  # #=============================
-  # # trajectory locations
+  #=============================
+  # trajectory locations
   trajectory_location_rows = which(CONF$context == "trajectory_location")
   trajectory_locations = tibble(name = CONF$name[trajectory_location_rows],
                                 start_criteria = CONF$start_criteria[trajectory_location_rows],
                                 end_criteria = CONF$end_criteria[trajectory_location_rows])
-  # save(palms, loca, participant_basis, file = "~/projects/fontys/state_1_gui.RData")
+  
   # Run palmsplusr ----------------------------------------------------------
   fns = c(paste0(palmsplus_folder, "/", dataset_name, "_palmsplus.csv"),
           paste0(palmsplus_folder, "/", dataset_name, "_days.csv"),
@@ -368,6 +370,7 @@ hbGIS <- function(gisdir = "",
   for (i in 1:Nlocations) {
     Nlocation_objects = c(Nlocation_objects, length(loca[[i]][[2]])) # at least a nbh object is expected #length(loca[[i]][[1]]), 
   }
+  
   if (verbose) cat("\n<<< building palmsplus...\n")
   if (length(palms) > 0 & length(palmsplus_fields) &
       all(Nlocation_objects > 0) & length(participant_basis) > 0) {
@@ -382,6 +385,7 @@ hbGIS <- function(gisdir = "",
   } else {
     if (verbose) cat("skipped because insufficient input data>>>\n")
   }
+  
   if (verbose) cat("\n<<< building days...")
   if (length(palmsplus) > 0 & length(palmsplus_domains) > 0 & length(palmsplus_fields) &
       all(Nlocation_objects > 0) & length(participant_basis) > 0) {
@@ -398,13 +402,11 @@ hbGIS <- function(gisdir = "",
     } else {
       if (verbose) cat(paste0("  WARNING: no days object produced."))
     }
-    
-    # sf::st_write(palmsplus, dsn = paste0(palmsplus_folder, "/", dataset_name, "_palmsplus.shp"), append = FALSE)
-    
   } else {
     if (verbose) cat("skipped because insufficient input data>>>\n")
   }
   if (verbose) cat(">>>\n")
+  
   trajectory_locations = trajectory_locations[order(trajectory_locations$name),]
   if (verbose) cat("\n<<< building trajectories...\n")
   if (length(palmsplus) > 0 & length(trajectory_fields) > 0) {
@@ -426,6 +428,7 @@ hbGIS <- function(gisdir = "",
   } else {
     if (verbose) cat("skipped because insufficient input data>>>\n")
   }
+  
   if (verbose) cat("\n<<< building multimodal...\n")
   if (length(palmsplus) > 0 & length(multimodal_fields) > 0 & length(trajectory_locations) > 0) {
     multimodal <- build_multimodal(data = trajectories,
