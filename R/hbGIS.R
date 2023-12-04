@@ -242,14 +242,14 @@ hbGIS <- function(gisdir = "",
   # ignore stored definition as we no longer use this
   
   CONF = CONF[which(CONF[,1] != "palmsplus_domain"), ] 
-  element1 = ifelse(length(locationNames_table) > 0, yes = paste0("!", paste0("at_", locationNames_table, collapse = " & !"), " & "), no = "")
+  element3 = ifelse(length(locationNames_table) > 0, yes = paste0("!", paste0("at_", locationNames_table, collapse = " & !"), " & "), no = "")
   CONF[nrow(CONF) + 1, ] = c("palmsplus_domain",
                              "transport",
-                            paste0(element1, "(pedestrian | bicycle | vehicle)"),
+                            paste0(element3, "(pedestrian | bicycle | vehicle)"),
                              TRUE, NA, "", "")
   CONF[nrow(CONF) + 1, ] = c("palmsplus_domain",
                              "other",
-                             paste0(element1, "(!pedestrian & !bicycle & !vehicle)", # removed because theorectically possible
+                             paste0(element3, "(!pedestrian & !bicycle & !vehicle)", # removed because theorectically possible
                                     ifelse(test = length(locationNames_nbh) > 0, yes = " & ", no = ""),
                                     paste0("!", paste0("at_", locationNames_nbh, "_nbh", collapse = " & !"))),
                              TRUE, NA, "", "")
@@ -318,18 +318,20 @@ hbGIS <- function(gisdir = "",
     reference_location = ifelse("home" %in% locationNames, yes = "home", no = locationNames[1])
     for (j in 1:Nlocations) {
       #add nbh if table is missing
+      element1 = ifelse(test = is.null(loca[[i]][[1]]), yes = "_nbh", no = "")
       element2 = ifelse(test = is.null(loca[[j]][[1]]), yes = "_nbh", no = "")
+      element4 = ifelse(test = is.null(loca[[reference_location]][[1]]), yes = "_nbh", no = "")
       # trajectory_location:
       #-------------------
       CONF[nrow(CONF) + 1, ] = c("trajectory_location",
-                                 paste0(locationNames[i], element2, "_", locationNames[i], element2),
-                                 paste0("at_", locationNames[i]), NA, paste0("at_", reference_location, element2),
-                                 paste0("at_", locationNames[i], element2),
+                                 paste0(locationNames[i], element1, "_", locationNames[j], element2),
+                                 paste0("at_", locationNames[i]), NA,
+                                 paste0("at_", reference_location, element4),
+                                 paste0("at_", locationNames[i], element1),
                                  paste0("at_", locationNames[j], element2))
     }
     CONF = CONF[!duplicated(CONF),]
   }
-  
   palmsplusr_field_rows = which(CONF$context == "palmsplus_field")
   palmsplus_fields = tibble(name = CONF$name[palmsplusr_field_rows],
                             formula = CONF$formula[palmsplusr_field_rows],
@@ -408,15 +410,13 @@ hbGIS <- function(gisdir = "",
   trajectory_locations = trajectory_locations[order(trajectory_locations$name),]
   if (verbose) cat("\n<<< building trajectories...\n")
   if (length(palmsplus) > 0 & length(trajectory_fields) > 0) {
-    
     trajectories <- build_trajectories(data = palmsplus,
                                        trajectory_fields = trajectory_fields,
                                        trajectory_locations = trajectory_locations)
     if (length(trajectories) > 0) {
       write_csv(trajectories,  file = fns[3])
-      shp_file = paste0(palmsplus_folder, "/", dataset_name, "_trajecories.shp")
+      shp_file = paste0(palmsplus_folder, "/", dataset_name, "_trajectories.shp")
       if (file.exists(shp_file)) file.remove(shp_file) # remove because st_write does not know how to overwrite
-      
       sf::st_write(obj = trajectories, dsn = shp_file)
       if (verbose) cat(paste0("  N rows in trajectories object: ", nrow(trajectories)))
     } else {
@@ -426,7 +426,6 @@ hbGIS <- function(gisdir = "",
   } else {
     if (verbose) cat("skipped because insufficient input data>>>\n")
   }
-  
   if (verbose) cat("\n<<< building multimodal...\n")
   if (length(palmsplus) > 0 & length(multimodal_fields) > 0 & length(trajectory_locations) > 0) {
     multimodal <- build_multimodal(data = trajectories,
