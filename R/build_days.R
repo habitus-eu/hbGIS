@@ -24,7 +24,7 @@
 #'
 #' @import dplyr
 #' @import sf
-#' @importFrom rlang parse_expr UQ
+#' @importFrom rlang parse_expr
 #' @importFrom purrr reduce
 #'
 #' @export
@@ -77,8 +77,8 @@ build_days <- function(data = NULL, verbose = TRUE,
   x <- list()
   for (i in domain_names) {
     x[[i]] <- data %>%
-      filter(UQ(as.name(i)) > 0) %>%
-      dplyr::select(-one_of(domain_names), duration) %>%
+      filter(!!(as.name(i)) > 0) %>%
+      dplyr::select(-any_of(domain_names), duration) %>%
       summarise_all(~ sum(.)) %>%
       ungroup() %>%
       rename_at(vars(-identifier, -date), ~ paste0(i, "_", .))
