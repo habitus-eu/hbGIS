@@ -24,9 +24,14 @@ hbGIS <- function(gisdir = "",
                   dataset_name = "",
                   configfile = "",
                   verbose = TRUE) {
+  # Hard code arguments that may need to become function arguments to give control to user
   groupinglocation = "school"
-  writeshp = FALSE
-  splitGIS = TRUE
+  writeshp = FALSE # whether to wrist a shape file
+  splitGIS = TRUE # whether to split sublocations (TRUE) or union them
+  sublocid = "OBJECTID" # column name in GIS file to identify sublocation id
+  
+  
+  #------------------------------------------------------------
   lon = identifier = palms = NULL # . = was also included, but probably wrong
   
   #===============================================
@@ -101,7 +106,7 @@ hbGIS <- function(gisdir = "",
           fn_4 = as.character(unlist(loca[[jj]][4]))
           gi2 = Nlocations + gi
           loca[[gi2]] = vector("list", 4)
-          objectname = as.character(st_drop_geometry(shp_dat[gi, "OBJECTID"]))
+          objectname = as.character(st_drop_geometry(shp_dat[gi, sublocid]))
           if (objectname == "NA") collect_na = c(collect_na, gi)
           loca[[gi2]][[2]] = shp_dat[gi, ]
           loca[[gi2]][[4]] = fn_4
@@ -492,7 +497,6 @@ hbGIS <- function(gisdir = "",
                                    multimodal_fields = multimodal_fields,
                                    trajectory_locations = trajectory_locations,
                                    verbose = verbose)
-    
     if (length(multimodal) > 0) {
       write_csv(multimodal, file = fns[4])
       shp_file = paste0(palmsplus_folder, "/", dataset_name, "_multimodal.shp")
