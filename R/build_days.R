@@ -86,5 +86,24 @@ build_days <- function(data = NULL, verbose = TRUE,
   
   result <- x %>%
     reduce(left_join, by = c("identifier" = "identifier", "date" = "date"))
+  
+  # Count the number of segments per domain per day per identifier
+  segmentcount = function(x) {
+    x = as.numeric(unlist(x)) # x is a tibble column, so first convert to numeric vector
+    return(length(which(rle(x)$values != 0)))
+  }
+  
+  for (dom in domain_names) {
+    if (dom != "total") {
+      result[, dom] <- NA
+      for (id in unique(result$identifier)) {
+        for (date in as.Date(unique(result$date[which(result$identifier == id)]))) {
+          CNT = segmentcount(data[which(data$identifier == id & data$date == date), dom])
+          result[which(result$identifier == id & result$date == date), dom] = CNT
+        }
+      }
+      names(result)[which(names(result) == dom)] = paste0(dom, "_segmentcount")
+    }
+  }
   return(result)
 }
