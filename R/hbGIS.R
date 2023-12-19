@@ -24,8 +24,9 @@ hbGIS <- function(gisdir = "",
                   dataset_name = "",
                   configfile = "",
                   verbose = TRUE) {
-  publiclocation = "park"
   groupinglocation = "school"
+  writeshp = FALSE
+  splitGIS = TRUE
   lon = identifier = palms = NULL # . = was also included, but probably wrong
   
   #===============================================
@@ -56,20 +57,25 @@ hbGIS <- function(gisdir = "",
   
   # Helper function to find shape files
   find_file = function(path, namelowercase) {
-    allcsvfiles = dir(path, recursive = TRUE, full.names = TRUE)
-    file_of_interest = allcsvfiles[which(tolower(basename(allcsvfiles)) == namelowercase)]
+    allshpfiles = dir(path, recursive = TRUE, full.names = TRUE, pattern = "shp")
+    file_of_interest = allshpfiles[which(tolower(basename(allshpfiles)) == namelowercase)]
     if (length(file_of_interest) == 0) file_of_interest = NULL
     return(file_of_interest)
   }
   # Find shape files
   locationNames_nbh = locationNames_table = NULL
+  ignore4trajectories = NULL
   for (jj in 1:Nlocations) {
+    # files with _table at the end of their name indicate that it is
+    # a location for which entries exist in the GIS-Person linkage file
     findfile3 = find_file(path = gisdir, namelowercase = paste0(locationNames[jj], "_table.shp"))
     if (!is.null(findfile3)) {
       loca[[jj]][3] = findfile3
       loca[[jj]][[1]] = sf::read_sf(loca[[jj]][3]) #e.g. school or home
       locationNames_table = c(locationNames_table, locationNames[jj])
     }
+    # files with "loc_" and "buffers" in their name are assumed to be the areas surrounding
+    # the table files (if exist)
     findfile4 = find_file(path = gisdir, namelowercase = paste0("loc_", locationNames[jj], "buffers.shp"))
     if (!is.null(findfile4)) {
       loca[[jj]][4] = findfile4
@@ -84,12 +90,43 @@ hbGIS <- function(gisdir = "",
     }
     # Only load shape file if it exists
     if (!is.null(loca[[jj]][4][[1]])) {
-      loca[[jj]][[2]] = sf::read_sf(loca[[jj]][4]) #e.g. school_nbh, home_nbh, or park
+      shp_dat = sf::read_sf(loca[[jj]][4]) #e.g. school_nbh, home_nbh, or park
+      # Check whether there are multiple polygons in the shapefile:
+      nshp = nrow(shp_dat)
+      loca[[jj]][[2]] = shp_dat # look at all sublocations combined either way
+      if (nshp > 1 & splitGIS == TRUE) {
+        collect_na = NULL
+        # Treat each polygon as a separate location
+        for (gi in 1:nshp) {
+          fn_4 = as.character(unlist(loca[[jj]][4]))
+          gi2 = Nlocations + gi
+          loca[[gi2]] = vector("list", 4)
+          objectname = as.character(st_drop_geometry(shp_dat[gi, "OBJECTID"]))
+          if (objectname == "NA") collect_na = c(collect_na, gi)
+          loca[[gi2]][[2]] = shp_dat[gi, ]
+          loca[[gi2]][[4]] = fn_4
+          newname = paste0(locationNames[jj], objectname)
+          names(loca[[gi2]]) =  c(newname,
+                                 paste0(newname, "_nbh"), 
+                                 paste0(newname, "_tablefile"),
+                                 paste0(newname, "_locbufferfile"))
+          locationNames = c(locationNames, newname)
+          names(loca)[[gi2]] = newname
+          locationNames_nbh = c(locationNames_nbh, newname)
+          ignore4trajectories = c(ignore4trajectories, newname)
+        }
+        if (length(collect_na) > 0) {
+          shp_dat = shp_dat[-collect_na, ]
+          locationNames = locationNames[-collect_na]
+          loca = loca[-collect_na]
+        }
+      }
     }
   }
+  Nlocations = length(locationNames)
   
-  # Force id numbers to be character(
   locationNames = names(loca)
+  # Force id numbers to be character to standardise format:
   for (i in 1:length(loca)) {
     if (!is.null(loca[[i]][3][[1]])) { # only consider locations with data
       for (j in 1:2) {
@@ -100,7 +137,6 @@ hbGIS <- function(gisdir = "",
       }
     }
   }
-
   #===============================================
   # hbGPS output (PALMS output)
   #===============================================
@@ -180,7 +216,6 @@ hbGIS <- function(gisdir = "",
   write.csv(palms_reduced_cleaned, PALMS_reduced_file, row.names = FALSE)
   palms = palmsplusr::read_palms(PALMS_reduced_file, verbose = FALSE)
   palms$datetime = as.POSIXct(palms$datetime, format = "%d/%m/%Y %H:%M:%S", tz = "")
-  
   #===============================================
   # Load linkage file and identify which PALMS ids and home/school
   # ids are missing, but allow for publiclocations that are not linked
@@ -237,6 +272,8 @@ hbGIS <- function(gisdir = "",
   #=====================================================
   # Expand CONF with standard location based fields
   #=====================================================
+  if (verbose) cat("\n<<< expand CONF...\n")
+  
   # palmsplus_domain:
   #-------------------
   # ignore stored definition as we no longer use this
@@ -254,11 +291,15 @@ hbGIS <- function(gisdir = "",
                                     paste0("!", paste0("at_", locationNames_nbh, "_nbh", collapse = " & !"))),
                              TRUE, NA, "", "")
   
+  cnt = nrow(CONF)
+  CONF[cnt + Nlocations,] = NA
+  cnt = cnt + 1
+
   for (i in 1:Nlocations) {
     # palmsplus_domain:
     #-------------------
     if (locationNames[i] %in% locationNames_table) {
-      CONF[nrow(CONF) + 1, ] = c("palmsplus_domain",
+      CONF[cnt, ] = c("palmsplus_domain",
                                  locationNames[i],
                                  paste0("at_", locationNames[i]), 
                                  TRUE,
@@ -266,72 +307,80 @@ hbGIS <- function(gisdir = "",
     } else if (locationNames[i] %in% locationNames_nbh) {
       # condition that only needs to be used if table element is present
       at_table = ifelse(test = locationNames[i] %in% locationNames_table == TRUE, yes = paste0("!at_", locationNames[i], " &"), no = "")
-      CONF[nrow(CONF) + 1, ] = c("palmsplus_domain",
+      CONF[cnt, ] = c("palmsplus_domain",
                                  paste0(locationNames[i], "_nbh"),
                                  paste0(at_table, " at_", locationNames[i], "_nbh", 
                                         " & (!vehicle)"), # removed !pedestrian & !bicycle &  because unclear why these are not possible in a neighbourhood, e.g. park
                                  TRUE,
                                  NA, "", "")
     }
-    
+    cnt = cnt + 1
     # palmsplus_field:
     #-------------------
     if (!is.null(loca[[i]][[1]])) {
       # only do this if there is table data (meaning that location is linked to participant basis file)
       if (locationNames[i] == "home") {
-        CONF[nrow(CONF) + 1, ] = c("palmsplus_field",
+        CONF[cnt, ] = c("palmsplus_field",
                                    paste0("at_", locationNames[i]), 
                                    paste0("palms_in_polygon(datai, polygons = dplyr::filter(", 
                                           locationNames[i],", identifier == i), identifier)"),
                                    NA, "", "", "")
-        CONF[nrow(CONF) + 1, ] = c("palmsplus_field",
+        cnt = cnt + 1
+        CONF[cnt, ] = c("palmsplus_field",
                                    paste0("at_", locationNames[i], "_nbh"), 
                                    paste0("palms_in_polygon(datai, polygons = dplyr::filter(",
                                           locationNames[i], "_nbh, identifier == i), identifier)"),
                                    NA, "", "", "")
+        cnt = cnt + 1
       } else {
-        CONF[nrow(CONF) + 1, ] = c("palmsplus_field",
+        CONF[cnt, ] = c("palmsplus_field",
                                    paste0("at_", locationNames[i]), 
                                    paste0("palms_in_polygon(datai, polygons = dplyr::filter(", 
                                           locationNames[i],",", locationNames[i],
                                           "_id == participant_basis %>% filter(identifier == i) %>% pull(",
                                           locationNames[i], "_id)))"),
                                    NA, "", "", "")
-        CONF[nrow(CONF) + 1, ] = c("palmsplus_field",
+        cnt = cnt + 1
+        CONF[cnt, ] = c("palmsplus_field",
                                    paste0("at_", locationNames[i], "_nbh"), 
                                    paste0("palms_in_polygon(datai, polygons = dplyr::filter(", 
                                           locationNames[i], "_nbh,", locationNames[i],
                                           "_id == participant_basis %>% filter(identifier == i) %>% pull(",
                                           locationNames[i], "_id)))"),
                                    NA, "", "", "")
+        cnt = cnt + 1
       }
     } else {
-      # palmsplus_domain:
-      #-------------------
       # locations not in linkagefile
-      # Note palms_in_polygon allows for aggregating polygons based by variable
-      CONF[nrow(CONF) + 1, ] = c("palmsplus_field",
+      # note that colSums will ensure that sublocation are combined
+      CONF[cnt, ] = c("palmsplus_field",
                                  paste0("at_", locationNames[i], "_nbh"), 
                                  paste0("suppressMessages(colSums(st_contains(", locationNames[i], "_nbh, datai, sparse = FALSE)))"),
                                  NA, "", "", "")
+      cnt = cnt + 1
     }
     reference_location = ifelse("home" %in% locationNames, yes = "home", no = locationNames[1])
     for (j in 1:Nlocations) {
-      #add nbh if table is missing
-      element1 = ifelse(test = is.null(loca[[i]][[1]]), yes = "_nbh", no = "")
-      element2 = ifelse(test = is.null(loca[[j]][[1]]), yes = "_nbh", no = "")
-      element4 = ifelse(test = is.null(loca[[reference_location]][[1]]), yes = "_nbh", no = "")
-      # trajectory_location:
-      #-------------------
-      CONF[nrow(CONF) + 1, ] = c("trajectory_location",
-                                 paste0(locationNames[i], element1, "_", locationNames[j], element2),
-                                 paste0("at_", locationNames[i]), NA,
-                                 paste0("at_", reference_location, element4),
-                                 paste0("at_", locationNames[i], element1),
-                                 paste0("at_", locationNames[j], element2))
+      # Do not derive trajectories for sublocation combinations
+      if (all(locationNames[c(i, j)] %in% ignore4trajectories == FALSE)) {
+        #add nbh if table is missing
+        element1 = ifelse(test = is.null(loca[[i]][[1]]), yes = "_nbh", no = "")
+        element2 = ifelse(test = is.null(loca[[j]][[1]]), yes = "_nbh", no = "")
+        element4 = ifelse(test = is.null(loca[[reference_location]][[1]]), yes = "_nbh", no = "")
+        # trajectory_location:
+        #-------------------
+        CONF[cnt, ] = c("trajectory_location",
+                        paste0(locationNames[i], element1, "_", locationNames[j], element2),
+                        paste0("at_", locationNames[i]), NA,
+                        paste0("at_", reference_location, element4),
+                        paste0("at_", locationNames[i], element1),
+                        paste0("at_", locationNames[j], element2))
+        cnt = cnt + 1
+      }
     }
     CONF = CONF[!duplicated(CONF),]
   }
+  if (verbose) cat(">>>\n\n")
   palmsplusr_field_rows = which(CONF$context == "palmsplus_field")
   palmsplus_fields = tibble(name = CONF$name[palmsplusr_field_rows],
                             formula = CONF$formula[palmsplusr_field_rows],
@@ -367,7 +416,6 @@ hbGIS <- function(gisdir = "",
   for (fn in fns) {
     if (file.exists(fn)) file.remove(fn)
   }
-  
   Nlocation_objects = NULL
   for (i in 1:Nlocations) {
     Nlocation_objects = c(Nlocation_objects, length(loca[[i]][[2]])) # at least a nbh object is expected #length(loca[[i]][[1]]), 
@@ -413,11 +461,20 @@ hbGIS <- function(gisdir = "",
     trajectories <- build_trajectories(data = palmsplus,
                                        trajectory_fields = trajectory_fields,
                                        trajectory_locations = trajectory_locations)
+    
+    
+    # library(mapview)
+    # mapview(list(trajectories, loca$green$green_nbh), col.regions=list("red","blue"), col = list("red", "blue"),
+    #         layer.name = c("trajectories", "green spaces"))
+
+    # browser()
     if (length(trajectories) > 0) {
       write_csv(trajectories,  file = fns[3])
       shp_file = paste0(palmsplus_folder, "/", dataset_name, "_trajectories.shp")
-      if (file.exists(shp_file)) file.remove(shp_file) # remove because st_write does not know how to overwrite
-      sf::st_write(obj = trajectories, dsn = shp_file)
+      if (writeshp == TRUE) {
+        if (file.exists(shp_file)) file.remove(shp_file) # remove because st_write does not know how to overwrite
+        sf::st_write(obj = trajectories, dsn = shp_file)
+      }
       if (verbose) cat(paste0("  N rows in trajectories object: ", nrow(trajectories)))
     } else {
       if (verbose) cat(paste0("  WARNING: no trajectories object produced."))
@@ -439,8 +496,10 @@ hbGIS <- function(gisdir = "",
     if (length(multimodal) > 0) {
       write_csv(multimodal, file = fns[4])
       shp_file = paste0(palmsplus_folder, "/", dataset_name, "_multimodal.shp")
-      if (file.exists(shp_file)) file.remove(shp_file) # remove because st_write does not know how to overwrite
-      sf::st_write(obj = multimodal, dsn = shp_file)
+      if (writeshp == TRUE) {
+        if (file.exists(shp_file)) file.remove(shp_file) # remove because st_write does not know how to overwrite
+        sf::st_write(obj = multimodal, dsn = shp_file)
+      }
       if (verbose) cat(paste0("  N rows in multimodal object: ", nrow(multimodal)))
     } else {
       if (verbose) cat(paste0("  WARNING: no multimodal object produced."))
