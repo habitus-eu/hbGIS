@@ -152,9 +152,9 @@ build_multimodal <- function(data = NULL,
       group_by(identifier, mmt_number) %>%
       summarise(start_trip = first(tripnumber),
                 end_trip = last(tripnumber),
-                trip_numbers = paste0(tripnumber, collapse = "-"),
+                trip_numbers = paste0(tripnumber, collapse = ">"),
                 n_segments = n(),
-                mot_order = paste0(mot, collapse = "-"),
+                mot_order = paste0(mot, collapse = ">"),
                 start = first(start),
                 end = last(end),
                 do_union = FALSE, .groups = 'keep') %>%
