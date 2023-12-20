@@ -227,6 +227,12 @@ hbGIS <- function(gisdir = "",
     dateTime = seq(now, now + ((Nmin - 1) * 60), by = 60)
     example_object = loca[[1]][[2]][1,]
     # in next link lwgeom is a dependency but sf somehow does not load it
+    if (!requireNamespace("lwgeom", quietly = TRUE)) {
+      stop(
+        "The 'lwgeom' package is required to run this function. ",
+        "Please install it first."
+      )
+    }
     point_in_object = suppressMessages(sf::st_sample(x = example_object, size = 1))
     
     xy = sf::st_coordinates(x = point_in_object)
