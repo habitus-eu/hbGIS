@@ -24,16 +24,16 @@
 #'
 #' @import dplyr
 #' @import sf
-#' @importFrom rlang parse_expr UQ
+#' @importFrom rlang parse_expr
 #' @importFrom purrr reduce
 #'
 #' @export
 # Code modified from https://thets.github.io/palmsplusr/
 build_days <- function(data = NULL, verbose = TRUE, 
-                           palmsplus_domains = NULL,
-                           palmsplus_fields = NULL,
-                           loca = NULL,
-                           participant_basis = NULL) {
+                       palmsplus_domains = NULL,
+                       palmsplus_fields = NULL,
+                       loca = NULL,
+                       participant_basis = NULL) {
   # Note:
   # home, school, home_nbh, school_nbh (or similar) need to be present, 
   # because the functions that are passed on assume that they exist
@@ -41,8 +41,10 @@ build_days <- function(data = NULL, verbose = TRUE,
   Nlocations = length(loca)
   identifier = NULL
   for (i in 1:Nlocations) {
-    txt = paste0(names(loca[[i]])[1], " = loca[[i]][[1]]")
-    eval(parse(text = txt))
+    for (j in 1:2) {
+      txt = paste0(names(loca[[i]])[j], " = loca[[i]][[j]]")
+      eval(parse(text = txt))
+    }
   }
   
   duration = datetime = name = domain_field = NULL
@@ -58,26 +60,25 @@ build_days <- function(data = NULL, verbose = TRUE,
   domain_args <- setNames("1", "total") %>% lapply(parse_expr)
   domain_args <- c(domain_args, setNames(domain_fields[[2]], domain_fields[[1]]) %>%
                      lapply(parse_expr))
-  
   data <- data %>%
     mutate(!!! domain_args) %>%
     mutate_if(is.logical, as.integer)
   
   fields <- palmsplus_fields %>% filter(domain_field == TRUE) %>% pull(name)
 
-    data <- data %>%
+  data <- data %>%
     st_set_geometry(NULL) %>%
     dplyr::select(identifier, datetime, any_of(domain_names), all_of(fields)) %>%
     mutate(duration = 1) %>%
     mutate_at(vars(-identifier,-datetime), ~ . * palms_epoch(data) / 60) %>%
     group_by(identifier, date = as.Date(datetime)) %>%
     dplyr::select(-datetime)
-
+  
   x <- list()
   for (i in domain_names) {
     x[[i]] <- data %>%
-      filter(UQ(as.name(i)) > 0) %>%
-      dplyr::select(-one_of(domain_names), duration) %>%
+      filter(!!(as.name(i)) > 0) %>%
+      dplyr::select(-any_of(domain_names), duration) %>%
       summarise_all(~ sum(.)) %>%
       ungroup() %>%
       rename_at(vars(-identifier, -date), ~ paste0(i, "_", .))
@@ -85,5 +86,24 @@ build_days <- function(data = NULL, verbose = TRUE,
   
   result <- x %>%
     reduce(left_join, by = c("identifier" = "identifier", "date" = "date"))
+  
+  # Count the number of segments per domain per day per identifier
+  segmentcount = function(x) {
+    x = as.numeric(unlist(x)) # x is a tibble column, so first convert to numeric vector
+    return(length(which(rle(x)$values != 0)))
+  }
+  
+  for (dom in domain_names) {
+    if (dom != "total") {
+      result[, dom] <- NA
+      for (id in unique(result$identifier)) {
+        for (date in as.Date(unique(result$date[which(result$identifier == id)]))) {
+          CNT = segmentcount(data[which(data$identifier == id & data$date == date), dom])
+          result[which(result$identifier == id & result$date == date), dom] = CNT
+        }
+      }
+      names(result)[which(names(result) == dom)] = paste0(dom, "_segmentcount")
+    }
+  }
   return(result)
 }
