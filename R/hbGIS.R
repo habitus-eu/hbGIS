@@ -420,7 +420,7 @@ hbGIS <- function(gisdir = "",
   trajectory_locations = tibble(name = CONF$name[trajectory_location_rows],
                                 start_criteria = CONF$start_criteria[trajectory_location_rows],
                                 end_criteria = CONF$end_criteria[trajectory_location_rows])
-  
+  write.csv(x = CONF[order(CONF$context), ], file = paste0(outputFolder, "/formula_log.csv"), row.names = FALSE)
   #===============================================
   # Load linkage file and identify which PALMS ids and home/school
   # ids are missing, but allow for publiclocations that are not linked
