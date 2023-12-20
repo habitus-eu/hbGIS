@@ -1,12 +1,12 @@
 
-#' Build the hbGIS dataset
+#' Build the whenwhat dataset
 #'
 #' @description Build the \code{hbGIS} dataset by adding additional columns to the hbGPS output data.
 #' The additional columns are specified using \code{\link{palms_add_field}}.
 #'
 #' @param data The hbGPS data obtained using \code{read_palms} from palmplusr.
 #' @param verbose Print progress to console after each iteration. Default is \code{TRUE}.
-#' @param palmsplus_fields palmsplus_fields defined in hbGIS
+#' @param whenwhat_field whenwhat_field defined in hbGIS
 #' @param loca Nested list with location information
 #' @param participant_basis participant_basis
 #'
@@ -21,7 +21,7 @@
 #' @export
 #' 
 # Code modified from https://thets.github.io/palmsplusr/
-build_hbGIS <- function(data = NULL, verbose = TRUE, palmsplus_fields = NULL,
+build_whenwhat <- function(data = NULL, verbose = TRUE, whenwhat_field = NULL,
                                 loca = NULL,
                                 participant_basis = NULL) {
   # Note:
@@ -37,8 +37,7 @@ build_hbGIS <- function(data = NULL, verbose = TRUE, palmsplus_fields = NULL,
     }
   }
   
-
-  field_args <- setNames(palmsplus_fields$formula, palmsplus_fields$name) %>%
+  field_args <- setNames(whenwhat_field$formula, whenwhat_field$name) %>%
     lapply(parse_expr)
   
   x <- list()

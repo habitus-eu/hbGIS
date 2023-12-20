@@ -26,7 +26,7 @@ load_params = function(file=c()) {
   colnames(params_merged)[which(colnames(params_merged) == "formula")] = "value"
   # colnames(params_merged)[which(colnames(params_merged) == "id")] = "field"
   colnames(params_merged)[which(colnames(params_merged) == "name")] = "subfield"
-  expected_tsv_columns = c(expected_tsv_columns, "domain_field", "after_conversion")
+  expected_tsv_columns = c(expected_tsv_columns, "is_where_field", "after_conversion")
   params = params_merged[, expected_tsv_columns]
   params = params[,-which(colnames(params) %in% c("subfield", "id", "field"))]
   

@@ -8,7 +8,7 @@ build_multimodal(
   data = NULL,
   spatial_threshold,
   temporal_threshold,
-  palmsplus = NULL,
+  whenwhat = NULL,
   verbose = TRUE,
   multimodal_fields = NULL,
   trajectory_locations = NULL
@@ -21,7 +21,7 @@ build_multimodal(
 
 \item{temporal_threshold}{Temporal threshold in minutes}
 
-\item{palmsplus}{The dataset build by \code{build_hbGIS}}
+\item{whenwhat}{The dataset build by \code{build_hbGIS}}
 
 \item{verbose}{Print progress after each step. Default is \code{TRUE}.}
 

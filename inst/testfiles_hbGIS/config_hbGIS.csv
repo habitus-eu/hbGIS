@@ -1,20 +1,20 @@
-context,name,formula,domain_field,after_conversion
-palmsplus_field,weekday,dow < 6,FALSE,NA
-palmsplus_field,weekend,dow > 5,FALSE,NA
-palmsplus_field,indoors,iov == 3,FALSE,NA
-palmsplus_field,outdoors,iov == 1,FALSE,NA
-palmsplus_field,in_vehicle,iov == 2,FALSE,NA
-palmsplus_field,inserted,fixtypecode == 6,FALSE,NA
-palmsplus_field,pedestrian,tripmot == 1,FALSE,NA
-palmsplus_field,bicycle,tripmot == 2,FALSE,NA
-palmsplus_field,vehicle,tripmot == 3,FALSE,NA
-palmsplus_field,nonwear,activityintensity < 0,TRUE,NA
-palmsplus_field,wear,activityintensity >= 0,TRUE,NA
-palmsplus_field,sedentary,activityintensity == 0,TRUE,NA
-palmsplus_field,light,activityintensity == 1,TRUE,NA
-palmsplus_field,moderate,activityintensity == 2,TRUE,NA
-palmsplus_field,vigorous,activityintensity == 3,TRUE,NA
-palmsplus_field,mvpa,moderate + vigorous,TRUE,NA
+context,name,formula,is_where_field,after_conversion
+whenwhat_field,weekday,dow < 6,FALSE,NA
+whenwhat_field,weekend,dow > 5,FALSE,NA
+whenwhat_field,indoors,iov == 3,FALSE,NA
+whenwhat_field,outdoors,iov == 1,FALSE,NA
+whenwhat_field,in_vehicle,iov == 2,FALSE,NA
+whenwhat_field,inserted,fixtypecode == 6,FALSE,NA
+whenwhat_field,pedestrian,tripmot == 1,FALSE,NA
+whenwhat_field,bicycle,tripmot == 2,FALSE,NA
+whenwhat_field,vehicle,tripmot == 3,FALSE,NA
+whenwhat_field,nonwear,activityintensity < 0,TRUE,NA
+whenwhat_field,wear,activityintensity >= 0,TRUE,NA
+whenwhat_field,sedentary,activityintensity == 0,TRUE,NA
+whenwhat_field,light,activityintensity == 1,TRUE,NA
+whenwhat_field,moderate,activityintensity == 2,TRUE,NA
+whenwhat_field,vigorous,activityintensity == 3,TRUE,NA
+whenwhat_field,mvpa,moderate + vigorous,TRUE,NA
 trajectory_field,mot,first(tripmot),NA,FALSE
 trajectory_field,date,first(as.Date(datetime)),NA,FALSE
 trajectory_field,start,datetime[triptype==1],NA,FALSE

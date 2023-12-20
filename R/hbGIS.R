@@ -205,10 +205,10 @@ hbGIS <- function(gisdir = "",
   #===============================================
   # hbGPS output (PALMS output)
   #===============================================
-  palmsplus_folder = paste0(outputdir, "/hbGIS_output")
-  if (!dir.exists(palmsplus_folder)) {
+  outputFolder = paste0(outputdir, "/hbGIS_output")
+  if (!dir.exists(outputFolder)) {
     if (verbose) cat("\nCreating hbGIS output directory\n")
-    dir.create(palmsplus_folder)
+    dir.create(outputFolder)
   }
   sf::sf_use_s2(FALSE)
   # identify palms csv output files in palmsdir:
@@ -276,7 +276,7 @@ hbGIS <- function(gisdir = "",
   PALMS_reduced$dateTime = as.POSIXct(PALMS_reduced$dateTime, format = "%d/%m/%Y %H:%M:%S", tz = "")
   
   # Write to csv and read using read_palms to format the object as expected from the rest of the code
-  PALMS_reduced_file = normalizePath(paste0(palmsplus_folder, "/", stringr::str_interp("PALMS_${dataset_name}_reduced.csv")))
+  PALMS_reduced_file = normalizePath(paste0(outputFolder, "/", stringr::str_interp("PALMS_${dataset_name}_reduced.csv")))
   # if (verbose) cat(paste0("\nCheck PALMS_reduced_file: ", PALMS_reduced_file))
   write.csv(palms_reduced_cleaned, PALMS_reduced_file, row.names = FALSE)
   palms = palmsplusr::read_palms(PALMS_reduced_file, verbose = FALSE)
@@ -288,16 +288,16 @@ hbGIS <- function(gisdir = "",
   #=====================================================
   if (verbose) cat("\n<<< expand CONF...\n")
   
-  # palmsplus_domain:
+  # where_field:
   #-------------------
   # # ignore stored definition as we no longer use this
-  # CONF = CONF[which(CONF[,1] != "palmsplus_domain"), ] 
+  # CONF = CONF[which(CONF[,1] != "where_field"), ] 
   element3 = ifelse(length(locationNames_table) > 0, yes = paste0("!", paste0("at_", locationNames_table, collapse = " & !"), " & "), no = "")
-  CONF[nrow(CONF) + 1, ] = c("palmsplus_domain",
+  CONF[nrow(CONF) + 1, ] = c("where_field",
                              "transport",
                              paste0(element3, "(pedestrian | bicycle | vehicle)"),
                              TRUE, NA, "", "")
-  CONF[nrow(CONF) + 1, ] = c("palmsplus_domain",
+  CONF[nrow(CONF) + 1, ] = c("where_field",
                              "other",
                              paste0(element3, "(!pedestrian & !bicycle & !vehicle)", # removed because theorectically possible
                                     ifelse(test = length(locationNames_nbh) > 0, yes = " & ", no = ""),
@@ -309,10 +309,10 @@ hbGIS <- function(gisdir = "",
   cnt = cnt + 1
   
   for (i in 1:Nlocations) {
-    # palmsplus_domain:
+    # where_field:
     #-------------------
     if (locationNames[i] %in% locationNames_table) {
-      CONF[cnt, ] = c("palmsplus_domain",
+      CONF[cnt, ] = c("where_field",
                       locationNames[i],
                       paste0("at_", locationNames[i]), 
                       TRUE,
@@ -320,7 +320,7 @@ hbGIS <- function(gisdir = "",
     } else if (locationNames[i] %in% locationNames_nbh) {
       # condition that only needs to be used if table element is present
       at_table = ifelse(test = locationNames[i] %in% locationNames_table == TRUE, yes = paste0("!at_", locationNames[i], " &"), no = "")
-      CONF[cnt, ] = c("palmsplus_domain",
+      CONF[cnt, ] = c("where_field",
                       paste0(locationNames[i], "_nbh"),
                       paste0(at_table, " at_", locationNames[i], "_nbh", 
                              " & (!vehicle)"), # removed !pedestrian & !bicycle &  because unclear why these are not possible in a neighbourhood, e.g. park
@@ -328,25 +328,25 @@ hbGIS <- function(gisdir = "",
                       NA, "", "")
     }
     cnt = cnt + 1
-    # palmsplus_field:
+    # whenwhat_field:
     #-------------------
     if (!is.null(loca[[i]][[1]])) {
       # only do this if there is table data (meaning that location is linked to participant basis file)
       if (locationNames[i] == "home") {
-        CONF[cnt, ] = c("palmsplus_field",
+        CONF[cnt, ] = c("whenwhat_field",
                         paste0("at_", locationNames[i]), 
                         paste0("palms_in_polygon(datai, polygons = dplyr::filter(", 
                                locationNames[i],", identifier == i), identifier)"),
                         NA, "", "", "")
         cnt = cnt + 1
-        CONF[cnt, ] = c("palmsplus_field",
+        CONF[cnt, ] = c("whenwhat_field",
                         paste0("at_", locationNames[i], "_nbh"), 
                         paste0("palms_in_polygon(datai, polygons = dplyr::filter(",
                                locationNames[i], "_nbh, identifier == i), identifier)"),
                         NA, "", "", "")
         cnt = cnt + 1
       } else {
-        CONF[cnt, ] = c("palmsplus_field",
+        CONF[cnt, ] = c("whenwhat_field",
                         paste0("at_", locationNames[i]), 
                         paste0("palms_in_polygon(datai, polygons = dplyr::filter(", 
                                locationNames[i],",", locationNames[i],
@@ -354,7 +354,7 @@ hbGIS <- function(gisdir = "",
                                locationNames[i], "_id)))"),
                         NA, "", "", "")
         cnt = cnt + 1
-        CONF[cnt, ] = c("palmsplus_field",
+        CONF[cnt, ] = c("whenwhat_field",
                         paste0("at_", locationNames[i], "_nbh"), 
                         paste0("palms_in_polygon(datai, polygons = dplyr::filter(", 
                                locationNames[i], "_nbh,", locationNames[i],
@@ -366,7 +366,7 @@ hbGIS <- function(gisdir = "",
     } else {
       # locations not in linkagefile
       # note that colSums will ensure that sublocation are combined
-      CONF[cnt, ] = c("palmsplus_field",
+      CONF[cnt, ] = c("whenwhat_field",
                       paste0("at_", locationNames[i], "_nbh"), 
                       paste0("suppressMessages(colSums(st_contains(", locationNames[i], "_nbh, datai, sparse = FALSE)))"),
                       NA, "", "", "")
@@ -394,15 +394,15 @@ hbGIS <- function(gisdir = "",
     CONF = CONF[!duplicated(CONF),]
   }
   if (verbose) cat(">>>\n\n")
-  palmsplusr_field_rows = which(CONF$context == "palmsplus_field")
-  palmsplus_fields = tibble(name = CONF$name[palmsplusr_field_rows],
-                            formula = CONF$formula[palmsplusr_field_rows],
-                            domain_field = CONF$domain_field[palmsplusr_field_rows])
+  whenwhat_field_rows = which(CONF$context == "whenwhat_field")
+  whenwhat_field = tibble(name = CONF$name[whenwhat_field_rows],
+                            formula = CONF$formula[whenwhat_field_rows],
+                            is_where_field = CONF$is_where_field[whenwhat_field_rows])
   
-  palmsplusr_domain_rows = which(CONF$context == "palmsplus_domain")
-  palmsplus_domains = tibble(name = CONF$name[palmsplusr_domain_rows],
-                             formula = CONF$formula[palmsplusr_domain_rows],
-                             domain_field = CONF$domain_field[palmsplusr_domain_rows])
+  where_field_rows = which(CONF$context == "where_field")
+  where_field = tibble(name = CONF$name[where_field_rows],
+                             formula = CONF$formula[where_field_rows],
+                             is_where_field = CONF$is_where_field[where_field_rows])
   #=============================
   # trajectory_fields
   trajectory_field_rows = which(CONF$context == "trajectory_field")
@@ -431,13 +431,13 @@ hbGIS <- function(gisdir = "",
     
     
     # Check for missing IDs -------------------------------------------------------------------------
-    withoutMissingId = check_missing_id(participant_basis, palmsplus_folder, dataset_name, palms,
+    withoutMissingId = check_missing_id(participant_basis, outputFolder, dataset_name, palms,
                                         loca, groupinglocation = groupinglocation,
                                         verbose = verbose)
     palms = withoutMissingId$palms
     participant_basis = withoutMissingId$participant_basis
     loca = withoutMissingId$loca
-    write.csv(participant_basis, paste0(palmsplus_folder, "/", stringr::str_interp("participant_basis_${dataset_name}.csv"))) # store file for logging purposes only
+    write.csv(participant_basis, paste0(outputFolder, "/", stringr::str_interp("participant_basis_${dataset_name}.csv"))) # store file for logging purposes only
     if (length(participant_basis) == 0 || nrow(participant_basis) == 0) {
       stop("\nParticipant basis file does not include references for the expected recording IDs")
     }
@@ -447,10 +447,10 @@ hbGIS <- function(gisdir = "",
   
   
   # Run palmsplusr ----------------------------------------------------------
-  fns = c(paste0(palmsplus_folder, "/", dataset_name, "_palmsplus.csv"),
-          paste0(palmsplus_folder, "/", dataset_name, "_days.csv"),
-          paste0(palmsplus_folder, "/", dataset_name, "_trajectories.csv"),
-          paste0(palmsplus_folder, "/", dataset_name, "_multimodal.csv"))
+  fns = c(paste0(outputFolder, "/", dataset_name, "_whenwhat.csv"),
+          paste0(outputFolder, "/", dataset_name, "_days.csv"),
+          paste0(outputFolder, "/", dataset_name, "_trajectories.csv"),
+          paste0(outputFolder, "/", dataset_name, "_multimodal.csv"))
   for (fn in fns) {
     if (file.exists(fn)) file.remove(fn)
   }
@@ -458,26 +458,26 @@ hbGIS <- function(gisdir = "",
   for (i in 1:Nlocations) {
     Nlocation_objects = c(Nlocation_objects, length(loca[[i]][[2]])) # at least a nbh object is expected #length(loca[[i]][[1]]), 
   }
-  if (verbose) cat("\n<<< building palmsplus...\n")
-  if (length(palms) > 0 & length(palmsplus_fields) &
+  if (verbose) cat("\n<<< building whenwhat...\n")
+  if (length(palms) > 0 & length(whenwhat_field) &
       all(Nlocation_objects > 0) & length(participant_basis) > 0) {
     
-    palmsplus <- build_hbGIS(data = palms, 
-                             palmsplus_fields = palmsplus_fields,
+    whenwhat <- build_whenwhat(data = palms, 
+                             whenwhat_field = whenwhat_field,
                              loca = loca,
                              participant_basis = participant_basis,
                              verbose = verbose)
-    write_csv(palmsplus, file = fns[1])
+    write_csv(whenwhat, file = fns[1])
     if (verbose) cat(">>>\n")
   } else {
     if (verbose) cat("skipped because insufficient input data>>>\n")
   }
   if (verbose) cat("\n<<< building days...")
-  if (length(palmsplus) > 0 & length(palmsplus_domains) > 0 & length(palmsplus_fields) &
+  if (length(whenwhat) > 0 & length(where_field) > 0 & length(whenwhat_field) &
       all(Nlocation_objects > 0) & length(participant_basis) > 0) {
-    days <- build_days(data = palmsplus,
-                       palmsplus_domains = palmsplus_domains,
-                       palmsplus_fields = palmsplus_fields,
+    days <- build_days(data = whenwhat,
+                       where_field = where_field,
+                       whenwhat_field = whenwhat_field,
                        loca = loca,
                        participant_basis = participant_basis,
                        verbose = verbose)
@@ -494,8 +494,8 @@ hbGIS <- function(gisdir = "",
   trajectory_locations = trajectory_locations[order(trajectory_locations$name),]
   
   if (verbose) cat("\n<<< building trajectories...\n")
-  if (length(palmsplus) > 0 & length(trajectory_fields) > 0) {
-    trajectories <- build_trajectories(data = palmsplus,
+  if (length(whenwhat) > 0 & length(trajectory_fields) > 0) {
+    trajectories <- build_trajectories(data = whenwhat,
                                        trajectory_fields = trajectory_fields,
                                        trajectory_locations = trajectory_locations)
     
@@ -506,7 +506,7 @@ hbGIS <- function(gisdir = "",
     # browser()
     if (length(trajectories) > 0) {
       write_csv(trajectories,  file = fns[3])
-      shp_file = paste0(palmsplus_folder, "/", dataset_name, "_trajectories.shp")
+      shp_file = paste0(outputFolder, "/", dataset_name, "_trajectories.shp")
       if (write_shp == TRUE) {
         if (file.exists(shp_file)) file.remove(shp_file) # remove because st_write does not know how to overwrite
         sf::st_write(obj = trajectories, dsn = shp_file)
@@ -520,17 +520,17 @@ hbGIS <- function(gisdir = "",
     if (verbose) cat("skipped because insufficient input data>>>\n")
   }
   if (verbose) cat("\n<<< building multimodal...\n")
-  if (length(palmsplus) > 0 & length(multimodal_fields) > 0 & length(trajectory_locations) > 0) {
+  if (length(whenwhat) > 0 & length(multimodal_fields) > 0 & length(trajectory_locations) > 0) {
     multimodal <- build_multimodal(data = trajectories,
                                    spatial_threshold = 200,
                                    temporal_threshold = 10,
-                                   palmsplus = palmsplus,
+                                   whenwhat = whenwhat,
                                    multimodal_fields = multimodal_fields,
                                    trajectory_locations = trajectory_locations,
                                    verbose = verbose)
     if (length(multimodal) > 0) {
       write_csv(multimodal, file = fns[4])
-      shp_file = paste0(palmsplus_folder, "/", dataset_name, "_multimodal.shp")
+      shp_file = paste0(outputFolder, "/", dataset_name, "_multimodal.shp")
       if (write_shp == TRUE) {
         if (file.exists(shp_file)) file.remove(shp_file) # remove because st_write does not know how to overwrite
         sf::st_write(obj = multimodal, dsn = shp_file)
