@@ -3,7 +3,7 @@
 export(build_days)
 export(build_multimodal)
 export(build_trajectories)
-export(build_whenwhat)
+export(build_whenwhatwhere)
 export(check_and_clean_palms_data)
 export(check_missing_id)
 export(hbGIS)

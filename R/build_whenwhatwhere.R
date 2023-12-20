@@ -1,4 +1,4 @@
-#' build_whenwhat
+#' build_whenwhatwhere
 #'
 #' @description Build the whenwhat dataset by adding additional columns to the
 #'  hbGPS output data based on whenwhat_field.
@@ -20,7 +20,7 @@
 #' @export
 #' 
 # Code modified from https://thets.github.io/palmsplusr/
-build_whenwhat <- function(data = NULL, verbose = TRUE, whenwhat_field = NULL,
+build_whenwhatwhere <- function(data = NULL, verbose = TRUE, whenwhat_field = NULL,
                                 loca = NULL,
                                 participant_basis = NULL) {
   # Note:

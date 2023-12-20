@@ -460,7 +460,7 @@ hbGIS <- function(gisdir = "",
   
   
   # Run palmsplusr ----------------------------------------------------------
-  fns = c(paste0(outputFolder, "/", dataset_name, "_whenwhat.csv"),
+  fns = c(paste0(outputFolder, "/", dataset_name, "_whenwhatwhere.csv"),
           paste0(outputFolder, "/", dataset_name, "_days.csv"),
           paste0(outputFolder, "/", dataset_name, "_trajectories.csv"),
           paste0(outputFolder, "/", dataset_name, "_multimodal.csv"))
@@ -471,11 +471,11 @@ hbGIS <- function(gisdir = "",
   for (i in 1:Nlocations) {
     Nlocation_objects = c(Nlocation_objects, length(loca[[i]][[2]])) # at least a nbh object is expected #length(loca[[i]][[1]]), 
   }
-  if (verbose) cat("\n<<< building whenwhat...\n")
+  if (verbose) cat("\n<<< building whenwhatwhere...\n")
   if (length(palms) > 0 & length(whenwhat_field) &
       all(Nlocation_objects > 0) & length(participant_basis) > 0) {
     
-    whenwhat <- build_whenwhat(data = palms, 
+    whenwhat <- build_whenwhatwhere(data = palms, 
                              whenwhat_field = whenwhat_field,
                              loca = loca,
                              participant_basis = participant_basis,

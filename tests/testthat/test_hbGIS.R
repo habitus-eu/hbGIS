@@ -31,13 +31,13 @@ test_that("hbGIS pipeline process file", {
   expect_equal(length(test_days), 37)
   expect_equal(sum(test_days[, 3:ncol(test_days)]), 3005)
   
-  # Check whenwhat
-  file = paste0(outdir, "/hbGIS_output/test_whenwhat.csv")
+  # Check whenwhatwhere
+  file = paste0(outdir, "/hbGIS_output/test_whenwhatwhere.csv")
   expect_true(file.exists(file))
-  test_whenwhat = read.csv(file)
-  expect_equal(nrow(test_whenwhat), 500)
-  expect_equal(ncol(test_whenwhat), 30)
-  expect_equal(sum(test_whenwhat[, 3:(ncol(test_whenwhat) - 1)]), 6075)
+  test_whenwhatwhere = read.csv(file)
+  expect_equal(nrow(test_whenwhatwhere), 500)
+  expect_equal(ncol(test_whenwhatwhere), 30)
+  expect_equal(sum(test_whenwhatwhere[, 3:(ncol(test_whenwhatwhere) - 1)]), 6075)
   
   # Check trajectories
   file = paste0(outdir, "/hbGIS_output/test_trajectories.csv")
