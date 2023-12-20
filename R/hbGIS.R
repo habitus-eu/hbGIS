@@ -18,6 +18,7 @@
 #' @importFrom readr write_csv read_csv
 #' @import palmsplusr
 #' @import dplyr
+#' @import lwgeom
 #' @importFrom utils head tail
 #' 
 #' @export
@@ -167,7 +168,7 @@ hbGIS <- function(gisdir = "",
           gi2 = Nlocations + gi
           loca[[gi2]] = vector("list", 4)
           
-          objectname = as.character(st_drop_geometry(shp_dat[gi, sublocationID]))
+          objectname = as.character(sf::st_drop_geometry(shp_dat[gi, sublocationID]))
           if (objectname == "NA") collect_na = c(collect_na, gi)
           loca[[gi2]][[2]] = shp_dat[gi, ]
           loca[[gi2]][[4]] = fn_4
@@ -225,7 +226,8 @@ hbGIS <- function(gisdir = "",
     now = as.POSIXct("2023-11-30 10:00:00 CET")
     dateTime = seq(now, now + ((Nmin - 1) * 60), by = 60)
     example_object = loca[[1]][[2]][1,]
-    point_in_object = suppressMessages(st_sample(x = example_object, size = 1))
+    # in next link lwgeom is a dependency but sf somehow does not load it
+    point_in_object = suppressMessages(sf::st_sample(x = example_object, size = 1))
     
     xy = sf::st_coordinates(x = point_in_object)
     
@@ -381,7 +383,7 @@ hbGIS <- function(gisdir = "",
       # note that colSums will ensure that sublocation are combined
       CONF[cnt, ] = c("whenwhat_field",
                       paste0("at_", locationNames[i], "_nbh"), 
-                      paste0("suppressMessages(colSums(st_contains(", locationNames[i], "_nbh, datai, sparse = FALSE)))"),
+                      paste0("suppressMessages(colSums(sf::st_contains(", locationNames[i], "_nbh, datai, sparse = FALSE)))"),
                       NA, "", "", "")
       cnt = cnt + 1
     }
