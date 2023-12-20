@@ -6,7 +6,7 @@
 #' @param data The trajectories object built with \code{palms_calc_trajectories}.
 #' @param spatial_threshold Spatial threshold in meters
 #' @param temporal_threshold Temporal threshold in minutes
-#' @param palmsplus The dataset build by \code{build_hbGIS}
+#' @param whenwhat The dataset build by \code{build_hbGIS}
 #' @param verbose Print progress after each step. Default is \code{TRUE}.
 #' @param multimodal_fields ...
 #' @param trajectory_locations ...
@@ -40,7 +40,7 @@
 build_multimodal <- function(data = NULL,
                                  spatial_threshold,
                                  temporal_threshold,
-                                 palmsplus = NULL,
+                                 whenwhat = NULL,
                                  verbose = TRUE,
                                  multimodal_fields = NULL,
                                  trajectory_locations = NULL) {
@@ -127,8 +127,8 @@ build_multimodal <- function(data = NULL,
                       trajectory_locations$end_criteria))
     
     
-    # Rather than recalculating geometry, just lookup in palmsplus
-    lookup <- palmsplus %>%
+    # Rather than recalculating geometry, just lookup in whenwhat
+    lookup <- whenwhat %>%
       filter(tripnumber > 0 & triptype %in% c(1, 4)) %>%
       as.data.frame() %>%
       dplyr::select(all_of(c("identifier", "tripnumber", "triptype", names)))

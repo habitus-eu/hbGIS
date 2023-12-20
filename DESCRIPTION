@@ -2,7 +2,7 @@ Package: hbGIS
 Title: Process GIS Data for Human Behaviour Research
 Description: Processes GIS data merge with hbGPS pre-processed data of wearable GPS and accelerometation sensors.
 Version: 0.0.1
-Date: 2023-11-09
+Date: 2023-12-20
 Authors@R: 
     c(person(given = "Vincent",
            family = "van Hees",

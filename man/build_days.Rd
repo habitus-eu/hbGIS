@@ -2,42 +2,35 @@
 % Please edit documentation in R/build_days.R
 \name{build_days}
 \alias{build_days}
-\title{Calculate day-level summaries from the palmsplus dataset}
+\title{Calculate day-level summaries from the whenwhat dataset}
 \usage{
 build_days(
   data = NULL,
   verbose = TRUE,
-  palmsplus_domains = NULL,
-  palmsplus_fields = NULL,
+  where_field = NULL,
+  whenwhat_field = NULL,
   loca = NULL,
   participant_basis = NULL
 )
 }
 \arguments{
-\item{data}{The palmsplus data obtained from \code{\link{palms_build_palmsplus}}.}
+\item{data}{The whenwhat data obtained from \code{\link{build_whenwhatwhere}}.}
 
 \item{verbose}{Print progress to console. Default is \code{TRUE}.}
 
-\item{palmsplus_domains}{...}
+\item{where_field}{...}
 
-\item{palmsplus_fields}{...}
+\item{whenwhat_field}{...}
 
 \item{loca}{Nested list with location information}
 
-\item{participant_basis}{participant_basis}
+\item{participant_basis}{participant_basis
+#'}
 }
 \value{
 A table summarised by day.
 }
 \description{
-Build a days dataset by summarising \code{palmsplus}
-by day and person (\code{identifier}). Not all variables in \code{palmsplus}
-are summarised, only those specified using \code{\link{palms_add_field}} with
-the argument \code{domain_field = TRUE}. By default, a \code{duration} field
-is added (e.g., the total minutes per day).
-
-All data are summarised by default. However, additional aggragation \emph{domains}
-can be specified using \code{\link{palms_add_domain}} before building days.
-Domains are a subset of data, such as during school time. All \code{domain_field}
-variables will be summarised for each \emph{domain} seperatly.
+Build a days dataset by summarising \code{whenwhat}
+by day and person (\code{identifier}).
 }
