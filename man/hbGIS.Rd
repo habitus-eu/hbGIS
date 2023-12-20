@@ -11,7 +11,12 @@ hbGIS(
   outputdir = "",
   dataset_name = "",
   configfile = "",
-  verbose = TRUE
+  verbose = TRUE,
+  baselocation = NULL,
+  groupinglocation = NULL,
+  write_shp = NULL,
+  split_GIS = NULL,
+  sublocationID = NULL
 )
 }
 \arguments{
@@ -28,6 +33,16 @@ hbGIS(
 \item{configfile}{Configuration file}
 
 \item{verbose}{verbose Boolean}
+
+\item{baselocation}{character, to specify reference location for individuals, e.g. home}
+
+\item{groupinglocation}{character, to specify reference location location for groups, e.g. school}
+
+\item{write_shp}{boolean, to indicate whether shape file should be written}
+
+\item{split_GIS}{boolean, to indicate whether sublocation inside GIS files are to be split}
+
+\item{sublocationID}{character, GIS column name to be used as identifier for sublocations}
 }
 \value{
 palms_to_clean_lower object

@@ -47,9 +47,8 @@ vigorous	multimodal_field		TRUE	formula				0	description missing
 mvpa	multimodal_field		TRUE	formula				0	description missing
 length	multimodal_field		TRUE	formula				0	description missing
 speed	multimodal_field		TRUE	formula				0	description missing
-home	palmsplus_domain		TRUE	formula				0	description missing
-school	palmsplus_domain		TRUE	formula				0	description missing
-transport	palmsplus_domain		TRUE	formula				0	description missing
-home_nbh	palmsplus_domain		TRUE	formula				0	description missing
-school_nbh	palmsplus_domain		TRUE	formula				0	description missing
-other	palmsplus_domain		TRUE	formula				0	description missing
+groupinglocation	general		TRUE	character				0	description missing
+baselocation	general		TRUE	character				0	description missing
+write_shp	general		TRUE	set			TRUE;FALSE	0	description missing
+split_GIS	general		TRUE	set			TRUE;FALSE	0	description missing
+sublocationID	general		TRUE	character				0	description missing

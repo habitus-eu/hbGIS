@@ -23,16 +23,14 @@ library(lwgeom)
 #       gislinkfile = NULL,
 #       outputdir = "D:/Dropbox/Work/sharedfolder/DATA/Habitus/GPSprocessing/JasperNov2023",
 #       dataset_name = "JasperNov2023",
-#       configfile = "D:/Dropbox/Work/sharedfolder/DATA/Habitus/GPSprocessing/NBBB2010/config_palmsplusr.csv")
-# kkk
+#       configfile = "D:/Dropbox/Work/sharedfolder/DATA/Habitus/GPSprocessing/NBBB2010/config_hbGIS.csv")
 # 
-hbGIS(gisdir = "D:/Dropbox/Work/sharedfolder/DATA/Habitus/GPSprocessing/NBBB2010/GIS",
-                 palmsdir = "D:/Dropbox/Work/sharedfolder/DATA/Habitus/GPSprocessing/NBBB2010/hbGPSoutput",
-                 gislinkfile = NULL, # "D:/Dropbox/Work/sharedfolder/DATA/Habitus/GPSprocessing/NBBB2010/Tables/participant_basis.csv",
-                 outputdir = "D:/Dropbox/Work/sharedfolder/DATA/Habitus/GPSprocessing/NBBB2010",
-                 dataset_name = "NBBB2010",
-                 configfile = "D:/Dropbox/Work/sharedfolder/DATA/Habitus/GPSprocessing/NBBB2010/config_palmsplusr.csv")
-kkk
+# hbGIS(gisdir = "D:/Dropbox/Work/sharedfolder/DATA/Habitus/GPSprocessing/NBBB2010/GIS",
+#                  palmsdir = "D:/Dropbox/Work/sharedfolder/DATA/Habitus/GPSprocessing/NBBB2010/hbGPSoutput",
+#                  gislinkfile = NULL, # "D:/Dropbox/Work/sharedfolder/DATA/Habitus/GPSprocessing/NBBB2010/Tables/participant_basis.csv",
+#                  outputdir = "D:/Dropbox/Work/sharedfolder/DATA/Habitus/GPSprocessing/NBBB2010",
+#                  dataset_name = "NBBB2010",
+#                  configfile = "D:/Dropbox/Work/sharedfolder/DATA/Habitus/GPSprocessing/NBBB2010/config_hbGIS.csv")
 
 # Belgium dataset
 hbGIS(gisdir = "D:/Dropbox/Work/sharedfolder/DATA/Habitus/GPSprocessing/BEtestdata/GIS/",
@@ -40,7 +38,7 @@ hbGIS(gisdir = "D:/Dropbox/Work/sharedfolder/DATA/Habitus/GPSprocessing/BEtestda
       gislinkfile = "D:/Dropbox/Work/sharedfolder/DATA/Habitus/GPSprocessing/BEtestdata/Tables/participant_basis.csv",
       outputdir = "D:/Dropbox/Work/sharedfolder/DATA/Habitus/GPSprocessing/BEtestdata",
       dataset_name = "BEtestdata",
-      configfile = "D:/Dropbox/Work/sharedfolder/DATA/Habitus/GPSprocessing/BEtestdata/config_palmsplusr.csv")
+      configfile = "D:/Dropbox/Work/sharedfolder/DATA/Habitus/GPSprocessing/BEtestdata/config_hbGIS.csv")
 jkjj
 # hbGIS(gisdir = "/media/vincent/projects/Habitus/palmsplusr/testdata/GIS",
 #                  palmsdir = "/media/vincent/projects/Habitus/palmsplusr/testdata/PALMS_output/",

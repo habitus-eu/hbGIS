@@ -7,6 +7,11 @@
 #' @param dataset_name Name of dataset
 #' @param configfile Configuration file
 #' @param verbose verbose Boolean
+#' @param baselocation character, to specify reference location for individuals, e.g. home
+#' @param groupinglocation character, to specify reference location location for groups, e.g. school
+#' @param write_shp boolean, to indicate whether shape file should be written
+#' @param split_GIS boolean, to indicate whether sublocation inside GIS files are to be split
+#' @param sublocationID character, GIS column name to be used as identifier for sublocations
 #' @return palms_to_clean_lower object
 #' @importFrom stats end start formula as.formula
 #' @importFrom tidyr pivot_wider
@@ -23,16 +28,66 @@ hbGIS <- function(gisdir = "",
                   outputdir = "",
                   dataset_name = "",
                   configfile = "",
-                  verbose = TRUE) {
-  # Hard code arguments that may need to become function arguments to give control to user
-  groupinglocation = "school"
-  writeshp = FALSE # whether to wrist a shape file
-  splitGIS = TRUE # whether to split sublocations (TRUE) or union them
-  sublocid = "OBJECTID" # column name in GIS file to identify sublocation id
+                  verbose = TRUE,
+                  baselocation = NULL,
+                  groupinglocation = NULL,
+                  write_shp = NULL,
+                  split_GIS = NULL,
+                  sublocationID = NULL) {
   
-  
+  #===============================================
+  # Load configuration and define field tables
+  #===============================================
+  if (length(configfile) > 0) {
+    # check for missing parameters, such that hbGIS can fall back on defaults
+    # here the config_pamsplusr file inside the package is assumed to hold all the defaults.
+    config_def  = system.file("testfiles_hbGIS/config_hbGIS.csv", package = "hbGIS")[1]
+    
+    params_def = load_params(file = config_def)
+    params_def$id = rownames(params_def)
+    params = load_params(file = configfile)
+    params$id = rownames(params)
+    missingPar = which(params_def$id %in% params$id == FALSE)
+    if (length(missingPar) > 0) {
+      # update the configfile as provide by the user
+      params = rbind(params, params_def[missingPar,])
+      params = params[, -which(colnames(params) == "id")]
+      update_params(new_params = params, file = configfile)
+    }
+    rm(params_def)
+    config <- configfile
+  } else {
+    # If no configfile is provided fall back on default
+    config <- system.file("testfiles_hbGIS/config_hbGIS.csv", package = "hbGIS")[1]
+  }
+  # adding fields
+  CONF = read.csv(config, sep = ",")
+  CONF$start_criteria = ""
+  CONF$end_criteria = ""
+
+  # Extract general parameters from config file if not provided as input arguments
+  if (is.null(groupinglocation)) {
+    groupinglocation =  CONF$formula[which(CONF$name == "groupinglocation")]
+  }
+  if (is.null(baselocation)) {
+    baselocation = CONF$formula[which(CONF$name == "baselocation")]
+  }
+  if (is.null(write_shp)) {
+    write_shp = CONF$formula[which(CONF$name == "write_shp")] # whether to wrist a shape file
+  }
+  if (is.null(split_GIS)) {
+    split_GIS = CONF$formula[which(CONF$name == "split_GIS")] # whether to split sublocations (TRUE) or union them
+  }
+  if (is.null(sublocationID)) {
+    sublocationID = CONF$formula[which(CONF$name == "sublocationID")]  # column name in GIS file to identify sublocation id
+  }
+  CONF = CONF[-which(CONF$context == "general"),]
+
   #------------------------------------------------------------
   lon = identifier = palms = NULL # . = was also included, but probably wrong
+  
+  
+  
   
   #===============================================
   # GIS files
@@ -104,7 +159,7 @@ hbGIS <- function(gisdir = "",
         cat(paste0("\n", basename(as.character(unlist(loca[[jj]][4]))),
                    " => ", paste0(names(shp_dat), collapse = ", "), " (", nshp, " geoms)"))
       }
-      if (nshp > 1 & splitGIS == TRUE & sublocid %in% names(shp_dat) & publiclocation) {
+      if (nshp > 1 & split_GIS == TRUE & sublocationID %in% names(shp_dat) & publiclocation) {
         collect_na = NULL
         # Treat each polygon as a separate location
         for (gi in 1:nshp) {
@@ -112,7 +167,7 @@ hbGIS <- function(gisdir = "",
           gi2 = Nlocations + gi
           loca[[gi2]] = vector("list", 4)
           
-          objectname = as.character(st_drop_geometry(shp_dat[gi, sublocid]))
+          objectname = as.character(st_drop_geometry(shp_dat[gi, sublocationID]))
           if (objectname == "NA") collect_na = c(collect_na, gi)
           loca[[gi2]][[2]] = shp_dat[gi, ]
           loca[[gi2]][[4]] = fn_4
@@ -226,59 +281,8 @@ hbGIS <- function(gisdir = "",
   write.csv(palms_reduced_cleaned, PALMS_reduced_file, row.names = FALSE)
   palms = palmsplusr::read_palms(PALMS_reduced_file, verbose = FALSE)
   palms$datetime = as.POSIXct(palms$datetime, format = "%d/%m/%Y %H:%M:%S", tz = "")
-  #===============================================
-  # Load linkage file and identify which PALMS ids and home/school
-  # ids are missing, but allow for publiclocations that are not linked
-  # to an ID
-  #===============================================
-  if (length(gislinkfile) > 0) {
-    participant_basis = read_csv(gislinkfile, show_col_types = FALSE)
-    
-    
-    # Check for missing IDs -------------------------------------------------------------------------
-    withoutMissingId = check_missing_id(participant_basis, palmsplus_folder, dataset_name, palms,
-                                        loca, groupinglocation = groupinglocation,
-                                        verbose = verbose)
-    palms = withoutMissingId$palms
-    participant_basis = withoutMissingId$participant_basis
-    loca = withoutMissingId$loca
-    write.csv(participant_basis, paste0(palmsplus_folder, "/", stringr::str_interp("participant_basis_${dataset_name}.csv"))) # store file for logging purposes only
-    if (length(participant_basis) == 0 || nrow(participant_basis) == 0) {
-      stop("\nParticipant basis file does not include references for the expected recording IDs")
-    }
-  } else {
-    participant_basis = ""
-  }
   
-  #===============================================
-  # Load configuration and define field tables
-  #===============================================
-  if (length(configfile) > 0) {
-    # check for missing parameters, such that hbGIS can fall back on defaults
-    # here the config_pamsplusr file inside the package is assumed to hold all the defaults.
-    config_def  = system.file("testfiles_hbGIS/config_hbGIS.csv", package = "hbGIS")[1]
-    params_def = load_params(file = config_def)
-    params_def$id = rownames(params_def)
-    params = load_params(file = configfile)
-    params$id = rownames(params)
-    missingPar = which(params_def$id %in% params$id == FALSE)
-    if (length(missingPar) > 0) {
-      # update the configfile as provide by the user
-      params = rbind(params, params_def[missingPar,])
-      params = params[, -which(colnames(params) == "id")]
-      update_params(new_params = params, file = configfile)
-    }
-    rm(params_def)
-    config <- configfile
-  } else {
-    # If no configfile is provided fall back on default
-    config <- system.file("testfiles_hbGIS/config_hbGIS.csv", package = "hbGIS")[1]
-  }
   
-  # adding fields
-  CONF = read.csv(config, sep = ",")
-  CONF$start_criteria = ""
-  CONF$end_criteria = ""
   #=====================================================
   # Expand CONF with standard location based fields
   #=====================================================
@@ -286,9 +290,8 @@ hbGIS <- function(gisdir = "",
   
   # palmsplus_domain:
   #-------------------
-  # ignore stored definition as we no longer use this
-  
-  CONF = CONF[which(CONF[,1] != "palmsplus_domain"), ] 
+  # # ignore stored definition as we no longer use this
+  # CONF = CONF[which(CONF[,1] != "palmsplus_domain"), ] 
   element3 = ifelse(length(locationNames_table) > 0, yes = paste0("!", paste0("at_", locationNames_table, collapse = " & !"), " & "), no = "")
   CONF[nrow(CONF) + 1, ] = c("palmsplus_domain",
                              "transport",
@@ -418,6 +421,31 @@ hbGIS <- function(gisdir = "",
                                 start_criteria = CONF$start_criteria[trajectory_location_rows],
                                 end_criteria = CONF$end_criteria[trajectory_location_rows])
   
+  #===============================================
+  # Load linkage file and identify which PALMS ids and home/school
+  # ids are missing, but allow for publiclocations that are not linked
+  # to an ID
+  #===============================================
+  if (length(gislinkfile) > 0) {
+    participant_basis = read_csv(gislinkfile, show_col_types = FALSE)
+    
+    
+    # Check for missing IDs -------------------------------------------------------------------------
+    withoutMissingId = check_missing_id(participant_basis, palmsplus_folder, dataset_name, palms,
+                                        loca, groupinglocation = groupinglocation,
+                                        verbose = verbose)
+    palms = withoutMissingId$palms
+    participant_basis = withoutMissingId$participant_basis
+    loca = withoutMissingId$loca
+    write.csv(participant_basis, paste0(palmsplus_folder, "/", stringr::str_interp("participant_basis_${dataset_name}.csv"))) # store file for logging purposes only
+    if (length(participant_basis) == 0 || nrow(participant_basis) == 0) {
+      stop("\nParticipant basis file does not include references for the expected recording IDs")
+    }
+  } else {
+    participant_basis = ""
+  }
+  
+  
   # Run palmsplusr ----------------------------------------------------------
   fns = c(paste0(palmsplus_folder, "/", dataset_name, "_palmsplus.csv"),
           paste0(palmsplus_folder, "/", dataset_name, "_days.csv"),
@@ -479,7 +507,7 @@ hbGIS <- function(gisdir = "",
     if (length(trajectories) > 0) {
       write_csv(trajectories,  file = fns[3])
       shp_file = paste0(palmsplus_folder, "/", dataset_name, "_trajectories.shp")
-      if (writeshp == TRUE) {
+      if (write_shp == TRUE) {
         if (file.exists(shp_file)) file.remove(shp_file) # remove because st_write does not know how to overwrite
         sf::st_write(obj = trajectories, dsn = shp_file)
       }
@@ -503,7 +531,7 @@ hbGIS <- function(gisdir = "",
     if (length(multimodal) > 0) {
       write_csv(multimodal, file = fns[4])
       shp_file = paste0(palmsplus_folder, "/", dataset_name, "_multimodal.shp")
-      if (writeshp == TRUE) {
+      if (write_shp == TRUE) {
         if (file.exists(shp_file)) file.remove(shp_file) # remove because st_write does not know how to overwrite
         sf::st_write(obj = multimodal, dsn = shp_file)
       }
