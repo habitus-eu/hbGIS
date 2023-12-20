@@ -1,4 +1,4 @@
-#' palmsplusr_shiny
+#' hbGIS
 #'
 #' @param gisdir Path to directory with GIS files
 #' @param palmsdir Path to hbGPS output directory

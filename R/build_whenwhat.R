@@ -1,8 +1,7 @@
-
-#' Build the whenwhat dataset
+#' build_whenwhat
 #'
-#' @description Build the \code{hbGIS} dataset by adding additional columns to the hbGPS output data.
-#' The additional columns are specified using \code{\link{palms_add_field}}.
+#' @description Build the whenwhat dataset by adding additional columns to the
+#'  hbGPS output data based on whenwhat_field.
 #'
 #' @param data The hbGPS data obtained using \code{read_palms} from palmplusr.
 #' @param verbose Print progress to console after each iteration. Default is \code{TRUE}.
@@ -27,7 +26,7 @@ build_whenwhat <- function(data = NULL, verbose = TRUE, whenwhat_field = NULL,
   # Note:
   # home, school, home_nbh, school_nbh (or similar) need to be present, 
   # because the functions that are passed on assume that they exist
-  # So, now we need to create those objects from object loca
+  # So, create those objects from object loca
   identifier = NULL
   Nlocations = length(loca)
   for (i in 1:Nlocations) {

@@ -2,7 +2,7 @@
 % Please edit documentation in R/build_whenwhat.R
 \name{build_whenwhat}
 \alias{build_whenwhat}
-\title{Build the whenwhat dataset}
+\title{build_whenwhat}
 \usage{
 build_whenwhat(
   data = NULL,
@@ -24,6 +24,6 @@ build_whenwhat(
 \item{participant_basis}{participant_basis}
 }
 \description{
-Build the \code{hbGIS} dataset by adding additional columns to the hbGPS output data.
-The additional columns are specified using \code{\link{palms_add_field}}.
+Build the whenwhat dataset by adding additional columns to the
+hbGPS output data based on whenwhat_field.
 }

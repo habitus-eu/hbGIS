@@ -2,7 +2,7 @@
 % Please edit documentation in R/hbGIS.R
 \name{hbGIS}
 \alias{hbGIS}
-\title{palmsplusr_shiny}
+\title{hbGIS}
 \usage{
 hbGIS(
   gisdir = "",
@@ -48,5 +48,5 @@ hbGIS(
 palms_to_clean_lower object
 }
 \description{
-palmsplusr_shiny
+hbGIS
 }
