@@ -167,7 +167,6 @@ hbGIS <- function(gisdir = "",
           fn_4 = as.character(unlist(loca[[jj]][4]))
           gi2 = Nlocations + gi
           loca[[gi2]] = vector("list", 4)
-          
           objectname = as.character(sf::st_drop_geometry(shp_dat[gi, sublocationID]))
           if (objectname == "NA") collect_na = c(collect_na, gi)
           loca[[gi2]][[2]] = shp_dat[gi, ]
@@ -226,8 +225,7 @@ hbGIS <- function(gisdir = "",
     now = as.POSIXct("2023-11-30 10:00:00 CET")
     dateTime = seq(now, now + ((Nmin - 1) * 60), by = 60)
     example_object = loca[[1]][[2]][1,]
-
-    point_in_object = suppressWarnings(st_sample(x = example_object, size = 1))
+    point_in_object = suppressMessages(st_sample(x = example_object, size = 1))
     xy = sf::st_coordinates(x = point_in_object)
     
     # latitude is for most of the time 1 lat degree away from location
