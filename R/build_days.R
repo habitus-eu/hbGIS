@@ -4,7 +4,7 @@
 #' @description Build a days dataset by summarising \code{whenwhat}
 #' by day and person (\code{identifier}). 
 #'
-#' @param data The whenwhat data obtained from \code{\link{build_whenwhat}}.
+#' @param data The whenwhat data obtained from \code{\link{build_whenwhatwhere}}.
 #' @param verbose Print progress to console. Default is \code{TRUE}.
 #' @param where_field ...
 #' @param whenwhat_field ...

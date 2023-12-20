@@ -14,7 +14,7 @@ build_days(
 )
 }
 \arguments{
-\item{data}{The whenwhat data obtained from \code{\link{build_whenwhat}}.}
+\item{data}{The whenwhat data obtained from \code{\link{build_whenwhatwhere}}.}
 
 \item{verbose}{Print progress to console. Default is \code{TRUE}.}
 
