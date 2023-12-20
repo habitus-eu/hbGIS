@@ -18,7 +18,6 @@
 #' @importFrom readr write_csv read_csv
 #' @import palmsplusr
 #' @import dplyr
-#' @import lwgeom
 #' @importFrom utils head tail
 #' 
 #' @export
@@ -220,46 +219,7 @@ hbGIS <- function(gisdir = "",
     palms_country_files = NULL
   }
   if (length(palms_country_files) == 0) {
-    # Simulate hbGPS output (only for code developement purposes)
-    Nmin = 500
-    now = as.POSIXct("2023-11-30 10:00:00 CET")
-    dateTime = seq(now, now + ((Nmin - 1) * 60), by = 60)
-    example_object = loca[[1]][[2]][1,]
-    point_in_object = suppressMessages(st_sample(x = example_object, size = 1))
-    xy = sf::st_coordinates(x = point_in_object)
-    
-    # latitude is for most of the time 1 lat degree away from location
-    # but for 30 minutes inside the location surround by 5 minute trips before and after
-    trip = seq(xy[1] - 1, xy[1] - 0.2, by = 0.2)
-    away = rep(xy[1] - 1, (Nmin/2) - 20)
-    lon = c(away, trip, rep(xy[1], 30), rev(trip), away)
-    lat = rep(xy[2], Nmin) # lon stays the same the entire time
-    tripNumber = c(rep(0, length(away)), rep(1, 5), rep(0, 30), rep(2, 5), rep(0, length(away)))
-    sedentaryBoutNumber = c(rep(1, length(away)), rep(0, 5), rep(2, 30), rep(0, 5), rep(3, length(away)))
-    tripType = rep(0, Nmin)
-    tripMOT = rep(0, Nmin)
-    tripType[which(diff(tripNumber) > 0) + 1] = 1
-    tripType[which(diff(tripNumber) < 0)] = 4
-    tripMOT[which(tripNumber != 0)] = 3
-    hbGPSout = data.frame(identifier = "sim1",
-                          dateTime	= dateTime,
-                          dow = rep(5, Nmin),
-                          lat	= lat,
-                          lon	= lon,
-                          fixTypeCode	= rep(-1, Nmin),
-                          iov	= rep(2, Nmin), # all the time outdoor (indoor, outdoor, vehicle)
-                          tripNumber = tripNumber,
-                          tripType = tripType,
-                          tripMOT	= tripMOT,
-                          activity = rep(0, Nmin),
-                          activityIntensity = rep(0, Nmin),
-                          activityBoutNumber = rep(0, Nmin),
-                          sedentaryBoutNumber = sedentaryBoutNumber)
-    # hbGPSout <- st_as_sf(hbGPSout, coords = c("lon", "lat"), crs = 4326)
-    if (is.null(palmsdir)) palmsdir = outputdir
-    if (!dir.exists(palmsdir)) dir.create(palmsdir, recursive = TRUE)
-    palms_country_files = paste0(palmsdir, "/combined.csv")
-    write.csv(hbGPSout, file = palms_country_files, row.names = FALSE)
+    stop("\nno data found")
   }
   
   # read and combine palms csv output files 
