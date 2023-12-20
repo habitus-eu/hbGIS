@@ -26,16 +26,23 @@ The code below shows an example of how use hbGIS.
 
 ```
 library(hbGIS)
-hbGIS(gisdir = "D:/myproject/GIS",
-                 palmsdir = "D:/myproject/hbGPSoutput",
-                 gislinkfile = "D:/myproject/Tables/participant_basis.csv",
-                 outputdir = "D:/myproject/",
-                 dataset_name = "myproject",
-                 configfile = "D:/myproject/config_hbGIS.csv")
+hbGIS(gisdir = "D:/myproject/GIS", # path to GIS file
+      palmsdir = "D:/myproject/hbGPSoutput", # path to palms or hbGPS output folder
+      gislinkfile = "D:/myproject/Tables/participant_basis.csv", # same as palmsplusr
+      outputdir = "D:/myproject/", # path to output folder
+      dataset_name = "myproject", # dataset name 
+      configfile = "D:/myproject/config_hbGIS.csv", # hbGIS config file (see note below)
+      baselocation = "home", # base for individuals (leave empty if not available)
+      groupinglocation = "school",  # grouping for individuals (leave empty if not available)
+      write_shp = FALSE, # whether to store shape files as output
+      split_GIS = TRUE, # whether to split GIS files in sublocations (only for public places)
+      sublocationID = "ID_NR") # column name in GIS file to identify sublocation
 
 ```
 
-Note: GIS filenames are used as location names and at the moment the code can only handle names that are shorter than 6 characters.
+Note:
+- GIS filenames are used as location names and at the moment the code can only handle names that are shorter than 6 characters.
+- Example config file can be found [here](https://github.com/habitus-eu/hbGIS/blob/main/inst/testfiles_hbGIS/config_hbGIS.csv)
 
 ## Output
 
