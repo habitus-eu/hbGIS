@@ -27,7 +27,7 @@ hbGIS <- function(gisdir = "",
                   gislinkfile = "",
                   outputdir = "",
                   dataset_name = "",
-                  configfile = "",
+                  configfile = NULL,
                   verbose = TRUE,
                   baselocation = NULL,
                   groupinglocation = NULL,
@@ -155,7 +155,7 @@ hbGIS <- function(gisdir = "",
       # Check whether there are multiple polygons in the shapefile:
       nshp = nrow(shp_dat)
       loca[[jj]][[2]] = shp_dat # look at all sublocations combined either way
-      if (publiclocation == TRUE) {
+      if (publiclocation == TRUE & verbose == TRUE) {
         cat(paste0("\n", basename(as.character(unlist(loca[[jj]][4]))),
                    " => ", paste0(names(shp_dat), collapse = ", "), " (", nshp, " geoms)"))
       }
@@ -212,16 +212,21 @@ hbGIS <- function(gisdir = "",
   }
   sf::sf_use_s2(FALSE)
   # identify palms csv output files in palmsdir:
-  palms_country_files <- list.files(path = palmsdir, pattern = "*.csv", full.names = TRUE)
-  # skip the combined file that palms generates
-  palms_country_files = grep(pattern = "combined.csv", x = palms_country_files, invert = TRUE, value = TRUE)
+  if (!is.null(palmsdir)) {
+    palms_country_files <- list.files(path = palmsdir, pattern = "*.csv", full.names = TRUE)
+    # skip the combined file that palms generates
+    palms_country_files = grep(pattern = "combined.csv", x = palms_country_files, invert = TRUE, value = TRUE)
+  } else {
+    palms_country_files = NULL
+  }
   if (length(palms_country_files) == 0) {
     # Simulate hbGPS output (only for code developement purposes)
     Nmin = 500
     now = as.POSIXct("2023-11-30 10:00:00 CET")
     dateTime = seq(now, now + ((Nmin - 1) * 60), by = 60)
     example_object = loca[[1]][[2]][1,]
-    point_in_object = st_sample(x = example_object, size = 1)
+    point_in_object = suppressMessages(st_sample(x = example_object, size = 1))
+    
     xy = sf::st_coordinates(x = point_in_object)
     
     # latitude is for most of the time 1 lat degree away from location
@@ -251,6 +256,8 @@ hbGIS <- function(gisdir = "",
                           activityIntensity = rep(0, Nmin),
                           activityBoutNumber = rep(0, Nmin),
                           sedentaryBoutNumber = sedentaryBoutNumber)
+    # hbGPSout <- st_as_sf(hbGPSout, coords = c("lon", "lat"), crs = 4326)
+    if (is.null(palmsdir)) palmsdir = outputdir
     if (!dir.exists(palmsdir)) dir.create(palmsdir, recursive = TRUE)
     palms_country_files = paste0(palmsdir, "/combined.csv")
     write.csv(hbGPSout, file = palms_country_files, row.names = FALSE)
@@ -276,7 +283,13 @@ hbGIS <- function(gisdir = "",
   PALMS_reduced$dateTime = as.POSIXct(PALMS_reduced$dateTime, format = "%d/%m/%Y %H:%M:%S", tz = "")
   
   # Write to csv and read using read_palms to format the object as expected from the rest of the code
-  PALMS_reduced_file = normalizePath(paste0(outputFolder, "/", stringr::str_interp("PALMS_${dataset_name}_reduced.csv")))
+  # if (substring(text = outputFolder, first = 1, last = 1) == ".") {
+  #   print("convert")
+  #   print(outputFolder)
+  #   outputFolder = gsub(pattern = "[.]", replacement = getwd(), x = outputFolder)
+  #   print(outputFolder)
+  # }
+  PALMS_reduced_file = suppressWarnings(normalizePath(paste0(outputFolder, "/", stringr::str_interp("PALMS_${dataset_name}_reduced.csv"))))
   # if (verbose) cat(paste0("\nCheck PALMS_reduced_file: ", PALMS_reduced_file))
   write.csv(palms_reduced_cleaned, PALMS_reduced_file, row.names = FALSE)
   palms = palmsplusr::read_palms(PALMS_reduced_file, verbose = FALSE)

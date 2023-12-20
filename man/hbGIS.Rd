@@ -10,7 +10,7 @@ hbGIS(
   gislinkfile = "",
   outputdir = "",
   dataset_name = "",
-  configfile = "",
+  configfile = NULL,
   verbose = TRUE,
   baselocation = NULL,
   groupinglocation = NULL,
