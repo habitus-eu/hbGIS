@@ -35,6 +35,8 @@ hbGIS(gisdir = "D:/myproject/GIS",
 
 ```
 
+Note: GIS filenames are used as location names and at the moment the code can only handle names that are shorter than 6 characters.
+
 ## Output
 
 hbGIS will create four output files:
