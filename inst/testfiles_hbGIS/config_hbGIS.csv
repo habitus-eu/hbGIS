@@ -1,9 +1,9 @@
 context,name,formula,is_where_field,after_conversion
 whenwhat_field,weekday,dow < 6,FALSE,NA
 whenwhat_field,weekend,dow > 5,FALSE,NA
-whenwhat_field,indoors,iov == 3,FALSE,NA
+whenwhat_field,indoors,iov == 2,FALSE,NA
 whenwhat_field,outdoors,iov == 1,FALSE,NA
-whenwhat_field,in_vehicle,iov == 2,FALSE,NA
+whenwhat_field,in_vehicle,iov == 3,FALSE,NA
 whenwhat_field,inserted,fixtypecode == 6,FALSE,NA
 whenwhat_field,pedestrian,tripmot == 1,FALSE,NA
 whenwhat_field,bicycle,tripmot == 2,FALSE,NA
