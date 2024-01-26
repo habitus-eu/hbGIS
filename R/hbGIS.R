@@ -16,6 +16,7 @@
 #' @importFrom stats end start formula as.formula
 #' @importFrom tidyr pivot_wider
 #' @importFrom readr write_csv read_csv
+#' @importFrom utils read.csv write.csv
 #' @import palmsplusr
 #' @import dplyr
 #' @importFrom utils head tail
@@ -39,26 +40,9 @@ hbGIS <- function(gisdir = "",
   # Load configuration and define field tables
   #===============================================
   if (length(configfile) > 0) {
-    # check for missing parameters, such that hbGIS can fall back on defaults
-    # here the config_pamsplusr file inside the package is assumed to hold all the defaults.
-    config_def  = system.file("testfiles_hbGIS/config_hbGIS.csv", package = "hbGIS")[1]
-    
-    params_def = load_params(file = config_def)
-    params_def$id = rownames(params_def)
-    params = load_params(file = configfile)
-    params$id = rownames(params)
-    missingPar = which(params_def$id %in% params$id == FALSE)
-    if (length(missingPar) > 0) {
-      # update the configfile as provide by the user
-      params = rbind(params, params_def[missingPar,])
-      params = params[, -which(colnames(params) == "id")]
-      update_params(new_params = params, file = configfile)
-    }
-    rm(params_def)
     config <- configfile
   } else {
-    # If no configfile is provided fall back on default
-    config <- system.file("testfiles_hbGIS/config_hbGIS.csv", package = "hbGIS")[1]
+    stop("config file not specified")
   }
   # adding fields
   CONF = read.csv(config, sep = ",")
