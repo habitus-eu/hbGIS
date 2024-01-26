@@ -48,11 +48,19 @@ Note:
 
 hbGIS will create four output files:
 
-Name                        | Content
-----------------------------|----------------
-$datasetname_whenwhatwhere.csv | Time series with information about when what where happened
-$datasetname_days.csv           | Day level summaries
-$datasetname_trajectories.csv   | Trajectory based summaries
-$datasetname_multimodal.csv     | Breakdown of trajectories by mode of transport
+Name                          | Content
+------------------------------|----------------
+datasetname_whenwhatwhere.csv | Time series with information about when what where happened
+datasetname_days.csv          | Day level summaries
+datasetname_trajectories.csv  | Trajectory based summaries
+datasetname_multimodal.csv    | Breakdown of trajectories by mode of transport
 
 
+Abbreviations used:
+
+Abbreviation | Meaning
+-------------|-------------
+mot          | mode of transport
+iov          | indoor outdoor vehicle
+nbh          | neighbourhood
+dow          | day of week
