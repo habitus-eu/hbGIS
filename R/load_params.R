@@ -14,12 +14,13 @@ load_params = function(file=c()) {
   # remove duplicates, because sometimes GGIR config files have duplicates
   dups = duplicated(params)
   params = params[!dups,]
-  # Keep only parameters with a matching description in the description file
-  params_info_hbGIS_file = system.file("testfiles_hbGIS/params_description_hbGIS.tsv", package = "hbGIS")[1]
-  params_info_hbGIS = read.table(file = params_info_hbGIS_file, sep = "\t", header = TRUE)
-  params_info_hbGIS$id = with(params_info_hbGIS, paste0(field,  "__",  parameter))
+  # # Keep only parameters with a matching description in the description file
+  # params_info_hbGIS_file = system.file("testfiles_hbGIS/params_description_hbGIS.tsv", package = "hbGIS")[1]
+  # params_info_hbGIS = read.table(file = params_info_hbGIS_file, sep = "\t", header = TRUE)
+  # params_info_hbGIS$id = with(params_info_hbGIS, paste0(field,  "__",  parameter))
   params$id = with(params, paste0(params$context, "__", params$name))
-  params_merged = merge(params_info_hbGIS, params, by.x = "id", by.y = "id")
+  # params_merged = merge(params_info_hbGIS, params, by.x = "id", by.y = "id")
+  params_merged = params
   dups = duplicated(params_merged)
   params_merged = params_merged[!dups,]
   rownames(params_merged) = params_merged$id
