@@ -1,4 +1,4 @@
-![GitHub Actions R-CMD-check](https://github.com/habitus-eu/hbGIS/workflows/R-CMD-check-full/badge.svg)
+[![R-CMD-check](https://github.com/habitus-eu/hbGIS/actions/workflows/r_new.yml/badge.svg)](https://github.com/habitus-eu/hbGIS/actions/workflows/r_new.yml)
 
 
 # hbGIS
