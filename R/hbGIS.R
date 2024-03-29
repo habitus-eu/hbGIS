@@ -35,7 +35,7 @@ hbGIS <- function(gisdir = "",
                   write_shp = NULL,
                   split_GIS = NULL,
                   sublocationID = NULL) {
-  
+  if (is.null(baselocation)) baselocation = "home"
   #===============================================
   # Load configuration and define field tables
   #===============================================
@@ -69,9 +69,6 @@ hbGIS <- function(gisdir = "",
 
   #------------------------------------------------------------
   lon = identifier = palms = NULL # . = was also included, but probably wrong
-  
-  
-  
   
   #===============================================
   # GIS files
@@ -288,7 +285,7 @@ hbGIS <- function(gisdir = "",
     #-------------------
     if (!is.null(loca[[i]][[1]])) {
       # only do this if there is table data (meaning that location is linked to participant basis file)
-      if (locationNames[i] == "home") {
+      if (locationNames[i] == baselocation) {
         CONF[cnt, ] = c("whenwhat_field",
                         paste0("at_", locationNames[i]), 
                         paste0("palms_in_polygon(datai, polygons = dplyr::filter(", 
@@ -328,7 +325,7 @@ hbGIS <- function(gisdir = "",
                       NA, "", "", "")
       cnt = cnt + 1
     }
-    reference_location = ifelse("home" %in% locationNames, yes = "home", no = locationNames[1])
+    reference_location = ifelse(baselocation %in% locationNames, yes = baselocation, no = locationNames[1])
     for (j in 1:Nlocations) {
       # Do not derive trajectories for sublocation combinations
       if (all(locationNames[c(i, j)] %in% ignore4trajectories == FALSE)) {
@@ -418,20 +415,20 @@ hbGIS <- function(gisdir = "",
   if (length(palms) > 0 & length(whenwhat_field) &
       all(Nlocation_objects > 0) & length(participant_basis) > 0) {
     
-    whenwhat <- build_whenwhatwhere(data = palms, 
+    whenwhatwhere <- build_whenwhatwhere(data = palms, 
                              whenwhat_field = whenwhat_field,
                              loca = loca,
                              participant_basis = participant_basis,
                              verbose = verbose)
-    write_csv(whenwhat, file = fns[1])
+    write_csv(whenwhatwhere, file = fns[1])
     if (verbose) cat(">>>\n")
   } else {
     if (verbose) cat("skipped because insufficient input data>>>\n")
   }
   if (verbose) cat("\n<<< building days...")
-  if (length(whenwhat) > 0 & length(where_field) > 0 & length(whenwhat_field) &
+  if (length(whenwhatwhere) > 0 & length(where_field) > 0 & length(whenwhat_field) &
       all(Nlocation_objects > 0) & length(participant_basis) > 0) {
-    days <- build_days(data = whenwhat,
+    days <- build_days(data = whenwhatwhere,
                        where_field = where_field,
                        whenwhat_field = whenwhat_field,
                        loca = loca,
@@ -450,8 +447,8 @@ hbGIS <- function(gisdir = "",
   trajectory_locations = trajectory_locations[order(trajectory_locations$name),]
   
   if (verbose) cat("\n<<< building trajectories...\n")
-  if (length(whenwhat) > 0 & length(trajectory_fields) > 0) {
-    trajectories <- build_trajectories(data = whenwhat,
+  if (length(whenwhatwhere) > 0 & length(trajectory_fields) > 0) {
+    trajectories <- build_trajectories(data = whenwhatwhere,
                                        trajectory_fields = trajectory_fields,
                                        trajectory_locations = trajectory_locations)
     
@@ -476,11 +473,11 @@ hbGIS <- function(gisdir = "",
     if (verbose) cat("skipped because insufficient input data>>>\n")
   }
   if (verbose) cat("\n<<< building multimodal...\n")
-  if (length(whenwhat) > 0 & length(multimodal_fields) > 0 & length(trajectory_locations) > 0) {
-    multimodal <- build_multimodal(data = trajectories,
+  if (length(whenwhatwhere) > 0 & length(multimodal_fields) > 0 & length(trajectory_locations) > 0) {
+    multimodal <- build_multimodal(trajectories = trajectories,
                                    spatial_threshold = 200,
                                    temporal_threshold = 10,
-                                   whenwhat = whenwhat,
+                                   whenwhatwhere = whenwhatwhere,
                                    multimodal_fields = multimodal_fields,
                                    trajectory_locations = trajectory_locations,
                                    verbose = verbose)

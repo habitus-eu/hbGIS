@@ -24,8 +24,7 @@ build_days(
 
 \item{loca}{Nested list with location information}
 
-\item{participant_basis}{participant_basis
-#'}
+\item{participant_basis}{participant_basis}
 }
 \value{
 A table summarised by day.
