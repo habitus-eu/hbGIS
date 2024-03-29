@@ -2,16 +2,16 @@
 % Please edit documentation in R/build_trajectories.R
 \name{build_trajectories}
 \alias{build_trajectories}
-\title{Build trajectories from the hbGIS dataset}
+\title{Build trajectory (trip?) summaries from the whenwhatwhere output}
 \usage{
 build_trajectories(
-  data = NULL,
+  whenwhatwhere = NULL,
   trajectory_fields = NULL,
   trajectory_locations = NULL
 )
 }
 \arguments{
-\item{data}{The dataset build by \code{build_hbGIS}.}
+\item{whenwhatwhere}{The whenwhatwhere object create by \code{build_whenwhatwhere}.}
 
 \item{trajectory_fields}{trajectory_fields}
 
@@ -21,7 +21,7 @@ build_trajectories(
 A table of individual trips represented as \code{LINESTRING} geometry.
 }
 \description{
-Build trajectories (trips) from the \code{hbGPS} dataset. This
+Build trip summaries based on the \code{build_whenwhatwhere} dataset. This
 returns a \code{sf data.frame} with \code{LINESTRING} geometry. Three columns
 are returned by default (\code{identifier}, \code{tripnumber}, and \code{geometry}).
 }

@@ -5,7 +5,7 @@
 \title{Calculate day-level summaries from the whenwhat dataset}
 \usage{
 build_days(
-  data = NULL,
+  whenwhatwhere = NULL,
   verbose = TRUE,
   where_field = NULL,
   whenwhat_field = NULL,
@@ -14,7 +14,7 @@ build_days(
 )
 }
 \arguments{
-\item{data}{The whenwhat data obtained from \code{\link{build_whenwhatwhere}}.}
+\item{whenwhatwhere}{The whenwhatwhere data obtained from \code{\link{build_whenwhatwhere}}.}
 
 \item{verbose}{Print progress to console. Default is \code{TRUE}.}
 
@@ -24,8 +24,7 @@ build_days(
 
 \item{loca}{Nested list with location information}
 
-\item{participant_basis}{participant_basis
-#'}
+\item{participant_basis}{participant_basis}
 }
 \value{
 A table summarised by day.

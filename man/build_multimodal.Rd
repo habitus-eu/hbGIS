@@ -5,23 +5,23 @@
 \title{Build multimodal trips from trajectories}
 \usage{
 build_multimodal(
-  data = NULL,
+  trajectories = NULL,
   spatial_threshold,
   temporal_threshold,
-  whenwhat = NULL,
+  whenwhatwhere = NULL,
   verbose = TRUE,
   multimodal_fields = NULL,
   trajectory_locations = NULL
 )
 }
 \arguments{
-\item{data}{The trajectories object built with \code{palms_calc_trajectories}.}
+\item{trajectories}{The trajectories object built with \code{palms_calc_trajectories}.}
 
 \item{spatial_threshold}{Spatial threshold in meters}
 
 \item{temporal_threshold}{Temporal threshold in minutes}
 
-\item{whenwhat}{The dataset build by \code{build_hbGIS}}
+\item{whenwhatwhere}{The dataset build by \code{build_hbGIS}}
 
 \item{verbose}{Print progress after each step. Default is \code{TRUE}.}
 
