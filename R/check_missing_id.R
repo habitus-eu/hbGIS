@@ -6,22 +6,24 @@
 #' @param palms palms object as loaded inside PALMSplusRshiny
 #' @param loca Nested list with location information
 #' @param groupinglocation groupinglocation
+#' @param baselocation character, to specify reference location for individuals, e.g. home
 #' @param verbose verbose
 #' @return List with participant_basis and palms object without non-matching IDs
 #'
 #' @export
 #' 
 check_missing_id = function(participant_basis, palmsplus_folder, dataset_name, palms,
-                                loca, groupinglocation = "school", verbose = TRUE) {
+                                loca, groupinglocation = "school", baselocation = baselocation,
+                            verbose = TRUE) {
   
   # Check whether id is found in all objects
   check_N = function(loca, participant_basis, palms, groupinglocation, verbose) {
     # Check loca
     locationNames = names(loca)
     for (i in 1:length(loca)) {
-      if (locationNames[i] != "home") {
+      if (locationNames[i] != baselocation) {
         loc_id = paste0(groupinglocation, "_id")
-      } else  if (locationNames[i] == "home") { # assumption that home is always the identifier for individuals
+      } else  if (locationNames[i] == baselocation) { # assumption that home is always the identifier for individuals
         loc_id = "identifier"
       } 
       for (j in 1:2) {
@@ -102,7 +104,7 @@ check_missing_id = function(participant_basis, palmsplus_folder, dataset_name, p
   # Make sure school, school_nbh, participant_basis have matching school_id numbers
   for (k in locationNames) {
     for (i in c(k, paste0(k, "_nbh"))) {
-      if (k == "home")  {
+      if (k == baselocation)  {
         idloc = "identifier"
       } else {
         idloc = paste0(k,"_id")

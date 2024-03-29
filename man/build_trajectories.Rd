@@ -5,13 +5,13 @@
 \title{Build trajectory (trip?) summaries from the whenwhatwhere output}
 \usage{
 build_trajectories(
-  data = NULL,
+  whenwhatwhere = NULL,
   trajectory_fields = NULL,
   trajectory_locations = NULL
 )
 }
 \arguments{
-\item{data}{The whenwhatwhere object create by \code{build_whenwhatwhere}.}
+\item{whenwhatwhere}{The whenwhatwhere object create by \code{build_whenwhatwhere}.}
 
 \item{trajectory_fields}{trajectory_fields}
 

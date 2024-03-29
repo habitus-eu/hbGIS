@@ -386,6 +386,7 @@ hbGIS <- function(gisdir = "",
     # Check for missing IDs -------------------------------------------------------------------------
     withoutMissingId = check_missing_id(participant_basis, outputFolder, dataset_name, palms,
                                         loca, groupinglocation = groupinglocation,
+                                        baselocation = baselocation,
                                         verbose = verbose)
     palms = withoutMissingId$palms
     participant_basis = withoutMissingId$participant_basis
@@ -428,7 +429,7 @@ hbGIS <- function(gisdir = "",
   if (verbose) cat("\n<<< building days...")
   if (length(whenwhatwhere) > 0 & length(where_field) > 0 & length(whenwhat_field) &
       all(Nlocation_objects > 0) & length(participant_basis) > 0) {
-    days <- build_days(data = whenwhatwhere,
+    days <- build_days(whenwhatwhere = whenwhatwhere,
                        where_field = where_field,
                        whenwhat_field = whenwhat_field,
                        loca = loca,
@@ -448,7 +449,7 @@ hbGIS <- function(gisdir = "",
   
   if (verbose) cat("\n<<< building trajectories...\n")
   if (length(whenwhatwhere) > 0 & length(trajectory_fields) > 0) {
-    trajectories <- build_trajectories(data = whenwhatwhere,
+    trajectories <- build_trajectories(whenwhatwhere = whenwhatwhere,
                                        trajectory_fields = trajectory_fields,
                                        trajectory_locations = trajectory_locations)
     

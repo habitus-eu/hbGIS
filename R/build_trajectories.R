@@ -5,7 +5,7 @@
 #' returns a \code{sf data.frame} with \code{LINESTRING} geometry. Three columns
 #' are returned by default (\code{identifier}, \code{tripnumber}, and \code{geometry}).
 #'
-#' @param data The whenwhatwhere object create by \code{build_whenwhatwhere}.
+#' @param whenwhatwhere The whenwhatwhere object create by \code{build_whenwhatwhere}.
 #' @param trajectory_fields trajectory_fields
 #' @param trajectory_locations trajectory_locations
 #'
@@ -18,7 +18,7 @@
 #'
 #' @export
 # Code modified from https://thets.github.io/palmsplusr/
-build_trajectories <- function(data = NULL, trajectory_fields = NULL, trajectory_locations = NULL) {
+build_trajectories <- function(whenwhatwhere = NULL, trajectory_fields = NULL, trajectory_locations = NULL) {
   # Initialise objects, to avoid R check problems with undeclared objects in dyplr expressions
   name = after_conversion = tripnumber = identifier = NULL
   
@@ -46,7 +46,7 @@ build_trajectories <- function(data = NULL, trajectory_fields = NULL, trajectory
     point_formulas <- c(point_formulas, formulas_locations)
   }
   # Build trajectories object
-  trajectories <- data %>% #whenwhatwhere field produced by build_whenwhatwhere
+  trajectories <- whenwhatwhere %>% #whenwhatwhere field produced by build_whenwhatwhere
     filter(tripnumber > 0) %>% # only data points that are part of a trip
     group_by(identifier, tripnumber) %>% # group by identifier and tripnumber
     summarise(!!!point_formulas, do_union = FALSE, .groups = 'keep') %>% # summarise with 'before' formulas from trajectory_fields

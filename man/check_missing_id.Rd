@@ -11,6 +11,7 @@ check_missing_id(
   palms,
   loca,
   groupinglocation = "school",
+  baselocation = baselocation,
   verbose = TRUE
 )
 }
@@ -26,6 +27,8 @@ check_missing_id(
 \item{loca}{Nested list with location information}
 
 \item{groupinglocation}{groupinglocation}
+
+\item{baselocation}{character, to specify reference location for individuals, e.g. home}
 
 \item{verbose}{verbose}
 }

@@ -4,7 +4,7 @@
 #' @description Build a days dataset by summarising \code{whenwhat}
 #' by day and person (\code{identifier}). 
 #'
-#' @param data The whenwhat data obtained from \code{\link{build_whenwhatwhere}}.
+#' @param whenwhatwhere The whenwhatwhere data obtained from \code{\link{build_whenwhatwhere}}.
 #' @param verbose Print progress to console. Default is \code{TRUE}.
 #' @param where_field ...
 #' @param whenwhat_field ...
@@ -20,7 +20,7 @@
 #'
 #' @export
 # Code modified from https://thets.github.io/palmsplusr/
-build_days <- function(data = NULL, verbose = TRUE, 
+build_days <- function(whenwhatwhere = NULL, verbose = TRUE, 
                        where_field = NULL,
                        whenwhat_field = NULL,
                        loca = NULL,
@@ -54,7 +54,7 @@ build_days <- function(data = NULL, verbose = TRUE,
   # for application to the data
   where_args <- c(where_args, setNames(where_field[[2]], where_field[[1]]) %>%
                      lapply(parse_expr))
-  data <- data %>% # object produced by build_whenwhatwhere
+  whenwhatwhere <- whenwhatwhere %>% # object produced by build_whenwhatwhere
     mutate(!!! where_args) %>% # create new columns that are functions of existing columns by using the where_field formulas
     mutate_if(is.logical, as.integer) # convert logical columns to integer
   
@@ -64,17 +64,17 @@ build_days <- function(data = NULL, verbose = TRUE,
   
   # Note code below assumes that epoch length is constant across the dataset
   # as discussed in https://github.com/habitus-eu/hbGIS/issues/16
-  data <- data %>%
+  whenwhatwhere <- whenwhatwhere %>%
     st_set_geometry(NULL) %>% # convert sf object to data.table to allow for next steps
     dplyr::select(identifier, datetime, any_of(where_names), all_of(whenwhat_names)) %>% # select only columns needed
     mutate(duration = 1) %>% # add column duration with value 1
-    mutate_at(vars(-identifier,-datetime), ~ . * palms_epoch(data) / 60) %>% # convert time indicators to not reflect number of epocchs but actual time in minutes
+    mutate_at(vars(-identifier,-datetime), ~ . * palms_epoch(whenwhatwhere) / 60) %>% # convert time indicators to not reflect number of epocchs but actual time in minutes
     group_by(identifier, date = as.Date(datetime)) %>% # add grouping by recording identifier and new date column
     dplyr::select(-datetime) # remove datetime column
   
   x <- list()
   for (i in where_names) {
-    x[[i]] <- data %>%
+    x[[i]] <- whenwhatwhere %>%
       filter(!!(as.name(i)) > 0) %>% #keep non-empty where_names?
       dplyr::select(-any_of(where_names)) %>% # ignore where_names
       summarise_all(~ sum(.)) %>% # sum per grouping levels date and identifier (as specified above)
@@ -101,7 +101,7 @@ build_days <- function(data = NULL, verbose = TRUE,
         # for each day:
         for (date in as.Date(unique(result$date[which(result$identifier == id)]))) {
           # count umber of segments:
-          CNT = segmentcount(data[which(data$identifier == id & data$date == date), dom])
+          CNT = segmentcount(whenwhatwhere[which(whenwhatwhere$identifier == id & whenwhatwhere$date == date), dom])
           result[which(result$identifier == id & result$date == date), dom] = CNT
         }
       }
