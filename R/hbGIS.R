@@ -270,7 +270,10 @@ hbGIS <- function(gisdir = "",
                       paste0("at_", locationNames[i]), 
                       TRUE,
                       NA, "", "")
-    } else if (locationNames[i] %in% locationNames_nbh) {
+      cnt = cnt + 1
+    }
+    
+    if (locationNames[i] %in% locationNames_nbh) {
       # condition that only needs to be used if table element is present
       at_table = ifelse(test = locationNames[i] %in% locationNames_table == TRUE, yes = paste0("!at_", locationNames[i], " &"), no = "")
       CONF[cnt, ] = c("where_field",
@@ -279,8 +282,9 @@ hbGIS <- function(gisdir = "",
                              " & (!vehicle)"), # removed !pedestrian & !bicycle &  because unclear why these are not possible in a neighbourhood, e.g. park
                       TRUE,
                       NA, "", "")
+      cnt = cnt + 1
     }
-    cnt = cnt + 1
+
     # whenwhat_field:
     #-------------------
     if (!is.null(loca[[i]][[1]])) {
@@ -428,12 +432,11 @@ hbGIS <- function(gisdir = "",
   }
   if (verbose) cat("\n<<< building days...")
   if (length(whenwhatwhere) > 0 & length(where_field) > 0 & length(whenwhat_field) &
-      all(Nlocation_objects > 0) & length(participant_basis) > 0) {
+      all(Nlocation_objects > 0)) {
     days <- build_days(whenwhatwhere = whenwhatwhere,
                        where_field = where_field,
                        whenwhat_field = whenwhat_field,
                        loca = loca,
-                       participant_basis = participant_basis,
                        verbose = verbose)
     if (length(days) > 0) {
       if (verbose) cat(paste0("\n  N rows in days object: ", nrow(days)))
