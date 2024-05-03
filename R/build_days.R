@@ -9,7 +9,6 @@
 #' @param where_field ...
 #' @param whenwhat_field ...
 #' @param loca Nested list with location information
-#' @param participant_basis participant_basis
 #'
 #' @return A table summarised by day.
 #'
@@ -23,8 +22,7 @@
 build_days <- function(whenwhatwhere = NULL, verbose = TRUE, 
                        where_field = NULL,
                        whenwhat_field = NULL,
-                       loca = NULL,
-                       participant_basis = NULL) {
+                       loca = NULL) {
   # Note:
   # home, school, home_nbh, school_nbh (or similar) need to be present, 
   # because the functions that are passed on assume that they exist

@@ -42,7 +42,7 @@ hbGIS(gisdir = "D:/myproject/GIS", # path to GIS file
 
 Note:
 - GIS filenames are used as location names and at the moment the code can only handle names that are shorter than 6 characters.
-- Example config file can be found [here](https://github.com/habitus-eu/hbGIS/blob/main/inst/testfiles_hbGIS/config_hbGIS.csv)
+- Example config file can be found [here](https://github.com/habitus-eu/HabitusGUI/tree/main/inst/testfiles_hbGIS/config_hbGIS.csv)
 
 ## Output
 

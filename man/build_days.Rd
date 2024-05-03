@@ -9,8 +9,7 @@ build_days(
   verbose = TRUE,
   where_field = NULL,
   whenwhat_field = NULL,
-  loca = NULL,
-  participant_basis = NULL
+  loca = NULL
 )
 }
 \arguments{
@@ -23,8 +22,6 @@ build_days(
 \item{whenwhat_field}{...}
 
 \item{loca}{Nested list with location information}
-
-\item{participant_basis}{participant_basis}
 }
 \value{
 A table summarised by day.
