@@ -8,7 +8,7 @@ Authors@R:
            family = "van Hees",
            role = c("aut", "cre"),
            email = "v.vanhees@accelting.com"),
-           person("Tom", "Stewart", role = "cph", email = "tom.stewart@aut.ac.nz",
+      person("Tom", "Stewart", role = "cph", email = "tom.stewart@aut.ac.nz",
            comment = "holds copyright over original palmsplusr code"))
 License: Apache License version 2.0 | file LICENSE
 Imports: dplyr, sf, readr, tidyr, stringr, palmsplusr, data.table, rlang, purrr, geosphere

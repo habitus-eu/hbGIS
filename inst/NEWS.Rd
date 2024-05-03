@@ -3,7 +3,7 @@
 \newcommand{\cpkg}{\href{http://CRAN.R-project.org/package=#1}{\pkg{#1}}}
 \section{Changes in version 0.0.3 (GitHub-only-release date: 03-05-2024)}{
   \itemize{
-    \item Fix missing neighbourhoud results in day output.
+    \item Fix missing neighbourhoud results in day output #21.
   }
 }
 \section{Changes in version 0.0.2 (GitHub-only-release date: 29-03-2024)}{
