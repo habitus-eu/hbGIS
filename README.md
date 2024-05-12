@@ -47,11 +47,11 @@ Note:
 
 ### gislinkagefile
 
-the `gislinkagefile` is used by hbGIS to match GIS shape files to individuals. Here a distinction is made between locations that are primarily link individuals and locations that primarily link groups, refer to as `baselocation` and `grouplocation`, respectively. The `gislinkagefile` was called `participant_basis` in palmsplusr, but as it was not documented and renamed here a description of what is expected. 
+The `gislinkagefile` is used by hbGIS to match GIS shape files to individuals. Here a distinction is made between locations that primarily link with individuals and locations that primarily link with groups of individuals, referred to as `baselocation` and `grouplocation`, respectively. The `gislinkagefile` was called `participant_basis` in palmsplusr. 
 
-If no `gislinkagefile` is used then hbGIS simply analyses when any participant visits the geographical areas as defined by the GIS shape files. When using a `gislinkagefile` then hbGIS uses this to tailor the analyses. This comes with the following assumptions about the data format:
+If no `gislinkagefile` is used then hbGIS simply analyses when any participant visits the locations (geographical areas) as defined by the GIS shape files. However, this is done without considering specific trajectories between the locations. When using a `gislinkagefile`, hbGIS uses this to tailor the analyses to look at trajectories such as home-school. For this to work hbGIS makes the following assumptions about the data format:
 
-- gislinkagefile has a column named `identifier` referring to the participant identifier code that matches with the identifier extracted from the wearable sensor data.
+- gislinkagefile is a csv file that has a column named `identifier` referring to the participant identifier code that matches with the identifier extracted from the wearable sensor data files.
 - gislinkagefile has one or multiple `x_id` columns referring to the location id for location `x`. For example, `school_id` or `office_id`. The string `_id` needs to be part of the column name.
 - GIS shape files corresponding to the `baselocation` to have a column named `identifier` which values match the values of the `identifer` column in the `gislinkagefile`.
 - GIS shapefiles corresponding to the `groupinglocation` to have a column named `x_id` which name and values match the name and values of the `x_id` column in the `gislinkagefile`.
