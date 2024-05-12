@@ -176,7 +176,10 @@ hbGIS <- function(gisdir = "",
     if (!is.null(loca[[i]][3][[1]])) { # only consider locations with data
       for (j in 1:2) {
         loc_id = grep(pattern = "ID|identifier|_id", x = colnames(loca[[i]][j][[1]]))
-        if (length(loc_id) > 0) {
+        if (length(loc_id) == 0) {
+          stop(paste0("Unclear which column to use as location identifier in ", 
+                         loca[[i]][3][[1]], " we see ", paste0(colnames(loca[[i]][j][[1]]), collapse = " ")))
+        } else if (length(loc_id) > 0) {
           loca[[i]][j][[1]][[loc_id]] = as.character(loca[[i]][j][[1]][[loc_id]])
         }
       }
