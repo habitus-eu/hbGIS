@@ -422,7 +422,6 @@ hbGIS <- function(gisdir = "",
   if (verbose) cat("\n<<< building whenwhatwhere...\n")
   if (length(palms) > 0 & length(whenwhat_field) &
       all(Nlocation_objects > 0) & length(participant_basis) > 0) {
-    
     whenwhatwhere <- build_whenwhatwhere(data = palms, 
                              whenwhat_field = whenwhat_field,
                              loca = loca,

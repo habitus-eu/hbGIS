@@ -30,6 +30,10 @@ build_whenwhatwhere <- function(data = NULL, verbose = TRUE, whenwhat_field = NU
   Nlocations = length(loca)
   for (i in 1:Nlocations) {
     for (j in 1:2) {
+      if (is.na(st_crs(loca[[i]][[j]]))) {
+        stop(paste0("GIS file lacks coordinate reference system specification",
+                    " as expected by hbGIS"), call. = FALSE)
+      }
       txt = paste0(names(loca[[i]])[j], " = loca[[i]][[j]]")
       eval(parse(text = txt))
     }

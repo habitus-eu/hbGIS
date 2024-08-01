@@ -11,11 +11,11 @@ Authors@R:
       person("Tom", "Stewart", role = "cph", email = "tom.stewart@aut.ac.nz",
            comment = "holds copyright over original palmsplusr code"))
 License: LGPL-3 | file LICENSE
-Imports: dplyr, sf, readr, tidyr, stringr, palmsplusr, data.table, rlang, purrr, geosphere
+Imports: dplyr, sf, readr, tidyr, stringr, palmsplusr, data.table, rlang, purrr, geosphere, lwgeom
 Remotes: vincentvanhees/palmsplusr
 LazyData: true
 Suggests: testthat, covr, rmarkdown
 Depends: stats, utils, R (>= 3.5.0)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
