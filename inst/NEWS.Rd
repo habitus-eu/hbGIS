@@ -1,13 +1,13 @@
 \name{NEWS}
 \title{News for Package \pkg{HabitusGUI}}
 \newcommand{\cpkg}{\href{http://CRAN.R-project.org/package=#1}{\pkg{#1}}}
-\section{Changes in version 0.0.4 (GitHub-only-release date: ??-??-2024)}{
+\section{Changes in version 0.0.4 (GitHub-only-release date: 01-08-2024)}{
   \itemize{
     \item Add documentation for gislinkagefile and GIS shapefiles #5.
+    \item Produce error when CRS is missing #26
+    \item Add lwgeom to imports #27
   }
 }
-
-
 \section{Changes in version 0.0.3 (GitHub-only-release date: 03-05-2024)}{
   \itemize{
     \item Fix missing neighbourhoud results in day output #21.
