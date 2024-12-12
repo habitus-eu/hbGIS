@@ -1,6 +1,6 @@
 # Description of R package hbGIS
 
-Note: This is not a practical guide on how to use `hbGIS`, but a description of every step in the software intended to be used for a documentation page and/or to inform methods paragraphs in scientific articles.
+Note: This is not a practical guide on how to use `hbGIS`, but a description of every step in the software intended to be used for a documentation page and/or to inform methods paragraphs in scientific articles. Additional information can be found in the [README](https://github.com/habitus-eu/hbGPS/blob/main/README.md) file.
 
 **COMMENTS:**
 

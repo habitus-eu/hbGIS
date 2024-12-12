@@ -56,6 +56,17 @@ If no `gislinkagefile` is used then hbGIS simply analyses when any participant v
 - GIS shape files corresponding to the `baselocation` to have a column named `identifier` which values match the values of the `identifer` column in the `gislinkagefile`.
 - GIS shapefiles corresponding to the `groupinglocation` to have a column named `x_id` which name and values match the name and values of the `x_id` column in the `gislinkagefile`.
 
+### Naming shape files
+
+The names and type of locations are derived from the GIS file names (shape files to be specific with .shp extension).
+Next, the linkage file is used to link individuals with locations. Locations that are not in the linkage file are assumed to be public locations.
+
+Therefore, a critical part of using hbGIS is to name the shape files correctly and to provide a linkage file to clarify the affiliations. In short:
+
+- GIS shape files with "\_table" in their name indicate that it holds the geographical information about one or multiple locations that participants can be affiliated with. For example, "schools_table.shp" is expected to hold all information about the schools. The linkage file is used to document which participants IDs correspond to a certain location ID.
+- GIS shape files with both "loc\_" and "buffer" in their name are assumed to be the areas surrounding the locations specified with the "\_table" files.
+- GIS shape files that only have "loc\_" in their name are assumed to be public spaces. Here, if there are multiple shapes inside such a file then those are interpreted as multiple instances of the same location category. For example, shapefile "loc_green.shp" may contain 100 green spaces.
+
 ## Output
 
 hbGIS will create four output files:
